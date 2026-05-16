@@ -12,7 +12,8 @@ import {
   Settings as SettingsIcon,
   MapPin,
   Sun,
-  Moon
+  Moon,
+  ShieldAlert
 } from 'lucide-react';
 import { useTheme } from './ThemeContext';
 
@@ -21,49 +22,49 @@ function Sidebar({ onLogout, user }) {
   const { isDarkMode, toggleTheme } = useTheme();
 
   let menuItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={22} strokeWidth={1.5} /> },
+    { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} strokeWidth={1.75} /> },
   ];
 
   if (user && user.role === 'ADMIN') {
     menuItems.push(
-      { name: 'Tasks', path: '/tasks', icon: <ListTodo size={22} strokeWidth={1.5} /> },
-      { name: 'Users', path: '/users', icon: <UserIcon size={22} strokeWidth={1.5} /> },
-      { name: 'Visits', path: '/visits', icon: <MapPin size={22} strokeWidth={1.5} /> },
-      { name: 'Reports', path: '/reports', icon: <BarChart3 size={22} strokeWidth={1.5} /> },
-      { name: 'Activity', path: '/logs', icon: <ClipboardList size={22} strokeWidth={1.5} /> },
-      { name: 'Regions', path: '/regions', icon: <MapIcon size={22} strokeWidth={1.5} /> },
-      { name: 'Teams', path: '/teams', icon: <UsersIcon size={22} strokeWidth={1.5} /> },
-      { name: 'Settings', path: '/settings', icon: <SettingsIcon size={22} strokeWidth={1.5} /> }
+      { name: 'Tasks', path: '/tasks', icon: <ListTodo size={20} strokeWidth={1.75} /> },
+      { name: 'Users', path: '/users', icon: <UserIcon size={20} strokeWidth={1.75} /> },
+      { name: 'Visits', path: '/visits', icon: <MapPin size={20} stroke="var(--text-secondary)" strokeWidth={1.75} /> },
+      { name: 'Reports', path: '/reports', icon: <BarChart3 size={20} strokeWidth={1.75} /> },
+      { name: 'Activity Logs', path: '/logs', icon: <ClipboardList size={20} strokeWidth={1.75} /> },
+      { name: 'Regions', path: '/regions', icon: <MapIcon size={20} strokeWidth={1.75} /> },
+      { name: 'Teams', path: '/teams', icon: <UsersIcon size={20} strokeWidth={1.75} /> },
+      { name: 'Settings', path: '/settings', icon: <SettingsIcon size={20} strokeWidth={1.75} /> }
     );
   } else if (user && user.role === 'TEAM_LEAD') {
     menuItems.push(
-      { name: 'Tasks', path: '/tasks', icon: <ListTodo size={22} strokeWidth={1.5} /> },
-      { name: 'My Team', path: '/my-team', icon: <UsersIcon size={22} strokeWidth={1.5} /> },
-      { name: 'Visits', path: '/visits', icon: <MapPin size={22} strokeWidth={1.5} /> },
-      { name: 'Reports', path: '/reports', icon: <BarChart3 size={22} strokeWidth={1.5} /> },
-      { name: 'Activity', path: '/logs', icon: <ClipboardList size={22} strokeWidth={1.5} /> },
-      { name: 'Profile', path: '/settings', icon: <UserIcon size={22} strokeWidth={1.5} /> }
+      { name: 'Tasks', path: '/tasks', icon: <ListTodo size={20} strokeWidth={1.75} /> },
+      { name: 'My Team', path: '/my-team', icon: <UsersIcon size={20} strokeWidth={1.75} /> },
+      { name: 'Visits', path: '/visits', icon: <MapPin size={20} strokeWidth={1.75} /> },
+      { name: 'Reports', path: '/reports', icon: <BarChart3 size={20} strokeWidth={1.75} /> },
+      { name: 'Activity Logs', path: '/logs', icon: <ClipboardList size={20} strokeWidth={1.75} /> },
+      { name: 'Profile', path: '/settings', icon: <UserIcon size={20} strokeWidth={1.75} /> }
     );
   } else if (user && user.role === 'AUDITOR') {
     menuItems.push(
-      { name: 'Visits', path: '/visits', icon: <MapPin size={22} strokeWidth={1.5} /> },
-      { name: 'Reports', path: '/reports', icon: <BarChart3 size={22} strokeWidth={1.5} /> },
-      { name: 'Activity', path: '/logs', icon: <ClipboardList size={22} strokeWidth={1.5} /> },
-      { name: 'Profile', path: '/settings', icon: <UserIcon size={22} strokeWidth={1.5} /> }
+      { name: 'Visits', path: '/visits', icon: <MapPin size={20} strokeWidth={1.75} /> },
+      { name: 'Reports', path: '/reports', icon: <BarChart3 size={20} strokeWidth={1.75} /> },
+      { name: 'Activity Logs', path: '/logs', icon: <ClipboardList size={20} strokeWidth={1.75} /> },
+      { name: 'Profile', path: '/settings', icon: <UserIcon size={20} strokeWidth={1.75} /> }
     );
   } else if (user && user.role === 'REGIONAL_MANAGER') {
     menuItems.push(
-      { name: 'Visits', path: '/visits', icon: <MapPin size={22} strokeWidth={1.5} /> },
-      { name: 'Reports', path: '/reports', icon: <BarChart3 size={22} strokeWidth={1.5} /> },
-      { name: 'Activity', path: '/logs', icon: <ClipboardList size={22} strokeWidth={1.5} /> },
-      { name: 'Profile', path: '/settings', icon: <UserIcon size={22} strokeWidth={1.5} /> }
+      { name: 'Visits', path: '/visits', icon: <MapPin size={20} strokeWidth={1.75} /> },
+      { name: 'Reports', path: '/reports', icon: <BarChart3 size={20} strokeWidth={1.75} /> },
+      { name: 'Activity Logs', path: '/logs', icon: <ClipboardList size={20} strokeWidth={1.75} /> },
+      { name: 'Profile', path: '/settings', icon: <UserIcon size={20} strokeWidth={1.75} /> }
     );
   } else {
     // Field Agents
     menuItems.push(
-      { name: 'My Tasks', path: '/tasks', icon: <ListTodo size={22} strokeWidth={1.5} /> },
-      { name: 'My Visits', path: '/visits', icon: <MapPin size={22} strokeWidth={1.5} /> },
-      { name: 'Profile', path: '/settings', icon: <UserIcon size={22} strokeWidth={1.5} /> }
+      { name: 'My Tasks', path: '/tasks', icon: <ListTodo size={20} strokeWidth={1.75} /> },
+      { name: 'My Visits', path: '/visits', icon: <MapPin size={20} strokeWidth={1.75} /> },
+      { name: 'Profile', path: '/settings', icon: <UserIcon size={20} strokeWidth={1.75} /> }
     );
   }
 
@@ -75,34 +76,22 @@ function Sidebar({ onLogout, user }) {
       display: 'flex', 
       flexDirection: 'column',
       justifyContent: 'space-between',
-      position: 'relative'
+      height: '100%'
     }}>
       
       {/* Top Section */}
-      <div>
-        <div style={{ marginBottom: '64px', position: 'relative' }}>
-          <h2 style={{ 
-            margin: '0', 
-            fontSize: '36px', 
-            color: 'var(--text-primary)',
-            lineHeight: 1
-          }}>
-            FieldOps.
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 8px', flexShrink: 0 }}>
+          <div style={{ width: '28px', height: '28px', background: 'var(--primary-gradient)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '14px' }}>
+            F
+          </div>
+          <h2 style={{ margin: '0', fontSize: '20px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
+            FieldOps
           </h2>
-          <div style={{ 
-            position: 'absolute', 
-            top: '-8px', 
-            left: '-12px', 
-            width: '24px', 
-            height: '24px', 
-            background: 'var(--primary-color)',
-            zIndex: -1,
-            mixBlendMode: 'multiply'
-          }} />
         </div>
         
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {menuItems.map((item, idx) => {
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto', flex: 1, paddingRight: '4px', marginBottom: '20px' }}>
+          {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link 
@@ -111,33 +100,36 @@ function Sidebar({ onLogout, user }) {
                 style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: '16px', 
-                  padding: '12px 0', 
-                  color: isActive ? 'var(--primary-color)' : 'var(--text-primary)',
+                  gap: '14px', 
+                  padding: '10px 14px', 
+                  color: isActive ? 'var(--primary-color)' : 'var(--text-secondary)',
                   textDecoration: 'none',
-                  fontWeight: isActive ? '700' : '500',
-                  fontSize: '15px',
-                  position: 'relative',
-                  transition: 'transform 0.2s ease',
-                  transform: isActive ? 'translateX(8px)' : 'none'
+                  fontWeight: isActive ? '600' : '500',
+                  fontSize: '14px',
+                  borderRadius: 'var(--radius-sm)',
+                  background: isActive ? 'var(--primary-subtle)' : 'transparent',
+                  transition: 'all 0.15s ease',
+                  flexShrink: 0
                 }}
                 onMouseEnter={e => {
-                  if(!isActive) e.currentTarget.style.transform = 'translateX(8px)';
+                  if(!isActive) {
+                    e.currentTarget.style.background = 'var(--surface-hover)';
+                    e.currentTarget.style.color = 'var(--text-primary)';
+                  }
                 }}
                 onMouseLeave={e => {
-                  if(!isActive) e.currentTarget.style.transform = 'none';
+                  if(!isActive) {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                  }
                 }}
               >
-                {isActive && (
-                  <div style={{ 
-                    position: 'absolute', 
-                    left: '-24px', 
-                    width: '4px', 
-                    height: '100%', 
-                    background: 'var(--primary-color)' 
-                  }} />
-                )}
-                {item.icon}
+                {React.cloneElement(item.icon, { 
+                  style: { 
+                    color: isActive ? 'var(--primary-color)' : 'var(--text-secondary)',
+                    transition: 'color 0.15s ease'
+                  } 
+                })}
                 {item.name}
               </Link>
             );
@@ -146,61 +138,71 @@ function Sidebar({ onLogout, user }) {
       </div>
 
       {/* Bottom Section */}
-      <div style={{ borderTop: '2px solid var(--border-color)', paddingTop: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ padding: '16px', borderRadius: 'var(--radius-md)', background: 'var(--surface-subtle)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '14px' }}>
           <div style={{ 
-            width: '48px', height: '48px', 
-            background: 'var(--surface-color)', 
-            border: '2px solid var(--border-color)',
-            boxShadow: '4px 4px 0px var(--primary-color)',
+            width: '40px', height: '40px', 
+            background: 'var(--primary-gradient)', 
+            borderRadius: 'var(--radius-sm)',
+            color: 'white',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: '700', fontSize: '20px', fontFamily: 'var(--font-heading)'
+            fontWeight: '700', fontSize: '16px'
           }}>
             {user?.username?.[0]?.toUpperCase() || 'U'}
           </div>
-          <div>
-            <div style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)' }}>
+          <div style={{ overflow: 'hidden' }}>
+            <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
               {user?.username}
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '2px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '600', marginTop: '2px' }}>
               {user?.role?.replace('_', ' ')}
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
           <button 
             onClick={toggleTheme}
             className="btn-outline"
             style={{ 
               flex: 1,
-              padding: '12px',
+              padding: '10px',
               display: 'flex',
               justifyContent: 'center',
-              alignItems: 'center'
+              alignItems: 'center',
+              borderRadius: 'var(--radius-sm)'
             }}
             title="Toggle Theme"
           >
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
           <button 
             onClick={onLogout} 
+            className="btn-outline"
             style={{ 
               flex: 1,
-              padding: '12px',
+              padding: '10px',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              background: 'var(--primary-color)',
-              color: '#fff',
-              boxShadow: '4px 4px 0px var(--border-color)',
-              border: '2px solid var(--border-color)'
+              gap: '8px',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--danger-color)',
+              borderColor: 'var(--border-color)'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'var(--danger-subtle)';
+              e.currentTarget.style.borderColor = 'var(--danger-color)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.borderColor = 'var(--border-color)';
             }}
             title="Logout"
           >
-            <LogOut size={20} />
+            <LogOut size={18} /> Logout
           </button>
         </div>
 

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { Sun, Moon } from 'lucide-react';
+import { useTheme } from '../components/ThemeContext';
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -19,6 +21,7 @@ function Signup() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { isDarkMode, toggleTheme } = useTheme();
 
   useEffect(() => {
     const fetchOptions = async () => {
@@ -75,7 +78,13 @@ function Signup() {
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-container" style={{ flexDirection: 'column', justifyContent: 'flex-start' }}>
+      <nav style={{ width: '100%', maxWidth: '1280px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '32px 20px', marginBottom: '20px' }}>
+        <Link to="/" style={{ textDecoration: 'none', fontSize: '1.5rem', fontWeight: '800', fontFamily: 'var(--font-heading)', color: 'var(--text-primary)' }}>FieldOps</Link>
+        <button onClick={toggleTheme} className="btn-outline" style={{ padding: '8px', borderRadius: 'var(--radius-sm)' }}>
+          {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+      </nav>
       <div className="auth-card" style={{ maxWidth: '500px' }}>
         <h2>Join FieldOps Pro</h2>
         <p className="auth-subtitle">Create your agent account today.</p>

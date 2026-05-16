@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { jwtDecode } from 'jwt-decode';
+import { Sun, Moon } from 'lucide-react';
+import { useTheme } from '../components/ThemeContext';
 
 function Login({ setUser }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,7 +25,13 @@ function Login({ setUser }) {
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-container" style={{ flexDirection: 'column', justifyContent: 'flex-start' }}>
+      <nav style={{ width: '100%', maxWidth: '1280px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '32px 20px', marginBottom: '40px' }}>
+        <Link to="/" style={{ textDecoration: 'none', fontSize: '1.5rem', fontWeight: '800', fontFamily: 'var(--font-heading)', color: 'var(--text-primary)' }}>FieldOps</Link>
+        <button onClick={toggleTheme} className="btn-outline" style={{ padding: '8px', borderRadius: 'var(--radius-sm)' }}>
+          {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+      </nav>
       <div className="auth-card">
         <h2>Field Ops Login</h2>
         <p className="auth-subtitle">Log in to manage your field operations.</p>

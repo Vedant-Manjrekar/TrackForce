@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { UserPlus, Edit2, ShieldAlert, CheckCircle, XCircle, Key } from 'lucide-react';
+import { UserPlus, Edit2, CheckCircle, XCircle, Key, Search, ShieldCheck, UserCheck, ShieldAlert, Users as UsersIcon } from 'lucide-react';
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -10,6 +10,8 @@ function Users() {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('create'); // 'create', 'edit', 'password'
   const [selectedUser, setSelectedUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState('ALL');
   
   const [formData, setFormData] = useState({
     username: '',
@@ -54,7 +56,7 @@ function Users() {
     if (user) {
       setFormData({
         username: user.username,
-        full_name: `${user.first_name || ''} ${user.last_name || ''}`,
+        full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
         email: user.email,
         role_name: user.role,
         region_id: regions.find(r => r.name === user.region)?.id || '',
@@ -84,7 +86,7 @@ function Users() {
         await api.post('/users/register/', formData);
       } else if (modalType === 'edit') {
         const payload = { ...formData };
-        delete payload.password; // Don't update password here
+        delete payload.password;
         await api.patch(`/users/${selectedUser.id}/`, payload);
       } else if (modalType === 'password') {
         await api.post(`/users/${selectedUser.id}/reset_password/`, { password: formData.password });
@@ -105,44 +107,213 @@ function Users() {
     }
   };
 
-  if (loading) return <div className="p-4">Loading users...</div>;
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = 
+      user.username?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.role?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesRole = roleFilter === 'ALL' || user.role === roleFilter;
+    
+    return matchesSearch && matchesRole;
+  });
+
+  if (loading) return <div style={{ padding: '40px', color: 'var(--text-secondary)', fontSize: '15px' }}>Retrieving user database...</div>;
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1>User Management</h1>
-        <button onClick={() => handleOpenModal('create')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <UserPlus size={18} /> Add User
+      <header style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <span className="enterprise-badge">
+              <UsersIcon size={14} /> Directory Governance
+            </span>
+          </div>
+          <h1 style={{ fontSize: '2rem', margin: 0, fontWeight: '800', letterSpacing: '-0.03em' }}>User Management</h1>
+        </div>
+        <button onClick={() => handleOpenModal('create')} style={{ padding: '12px 24px', fontSize: '14px' }}>
+          <UserPlus size={18} /> Provision User
         </button>
+      </header>
+
+      {/* Filter Bar */}
+      <div className="card" style={{ padding: '20px 24px', marginBottom: '24px', display: 'flex', gap: '16px', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flex: 1, maxWidth: '480px' }}>
+          <div style={{ position: 'relative', flex: 1 }}>
+            <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
+            <input 
+              type="text" 
+              placeholder="Search by username, email, or role..." 
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              style={{ width: '100%', paddingLeft: '42px', paddingRight: '16px', py: '10px' }}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Filter Role:</span>
+          <select 
+            value={roleFilter} 
+            onChange={e => setRoleFilter(e.target.value)}
+            style={{ padding: '10px 16px', width: '180px' }}
+          >
+            <option value="ALL">All Roles</option>
+            <option value="ADMIN">Admin</option>
+            <option value="TEAM_LEAD">Team Lead</option>
+            <option value="REGIONAL_MANAGER">Regional Manager</option>
+            <option value="AUDITOR">Auditor</option>
+            <option value="FIELD_AGENT">Field Agent</option>
+          </select>
+        </div>
       </div>
 
+      {/* User Table */}
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr>
+              <th style={{ padding: '16px 24px' }}>User Operative</th>
+              <th style={{ padding: '16px 24px' }}>System Role</th>
+              <th style={{ padding: '16px 24px' }}>Assignment Scoping</th>
+              <th style={{ padding: '16px 24px' }}>Status</th>
+              <th style={{ padding: '16px 24px', textAlign: 'right' }}>Governance Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredUsers.map((user, idx) => {
+              let badgeStyle = "status-assigned";
+              if (user.role === 'ADMIN') badgeStyle = "status-pending"; // warning/amber
+              if (user.role === 'AUDITOR') badgeStyle = "status-completed"; // success/green
+
+              return (
+                <tr key={user.id} style={{ borderBottom: idx === filteredUsers.length - 1 ? 'none' : '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '16px 24px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <div style={{ width: '38px', height: '38px', borderRadius: 'var(--radius-sm)', background: 'var(--surface-hover)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', color: 'var(--text-primary)', fontSize: '15px' }}>
+                        {user.username?.[0]?.toUpperCase()}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '14px', marginBottom: '2px' }}>{user.username}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{user.email || 'No email provided'}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '16px 24px' }}>
+                    <span className={`status-badge ${badgeStyle}`}>
+                      {user.role?.replace('_', ' ')}
+                    </span>
+                  </td>
+                  <td style={{ padding: '16px 24px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '2px' }}>{user.region || 'Global Access'}</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>{user.team || 'Unassigned Team'}</div>
+                  </td>
+                  <td style={{ padding: '16px 24px' }}>
+                    <button 
+                      onClick={() => toggleStatus(user)}
+                      className="btn-outline"
+                      style={{ 
+                        padding: '6px 12px', 
+                        fontSize: '12px', 
+                        fontWeight: '600',
+                        color: user.is_active ? 'var(--success-color)' : 'var(--danger-color)',
+                        borderColor: user.is_active ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)',
+                        background: user.is_active ? 'var(--success-subtle)' : 'var(--danger-subtle)'
+                      }}
+                      title="Toggle Active Status"
+                    >
+                      {user.is_active ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                      {user.is_active ? 'Active' : 'Suspended'}
+                    </button>
+                  </td>
+                  <td style={{ padding: '16px 24px', textAlign: 'right' }}>
+                    <div style={{ display: 'inline-flex', gap: '8px' }}>
+                      <button 
+                        onClick={() => handleOpenModal('edit', user)} 
+                        className="btn-outline" 
+                        style={{ padding: '8px', borderRadius: 'var(--radius-sm)' }}
+                        title="Modify User Configuration"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleOpenModal('password', user)} 
+                        className="btn-outline" 
+                        style={{ padding: '8px', borderRadius: 'var(--radius-sm)' }}
+                        title="Force Password Reset"
+                      >
+                        <Key size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+            {filteredUsers.length === 0 && (
+              <tr>
+                <td colSpan="5" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                  No operatives match the specified filter criteria.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Provision / Edit Modal */}
       {showModal && (
-        <div className="modal-overlay" style={{
+        <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-          background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+          background: 'rgba(11, 15, 23, 0.8)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000,
+          padding: '20px'
         }}>
-          <div className="card" style={{ width: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
-            <h2>{modalType === 'create' ? 'Create New User' : modalType === 'edit' ? 'Edit User' : 'Reset Password'}</h2>
-            <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '15px', marginTop: '20px' }}>
+          <div className="card" style={{ width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto', padding: '36px', boxShadow: 'var(--shadow-xl)', border: '1px solid var(--border-color)' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '8px', fontWeight: '800' }}>
+              {modalType === 'create' ? 'Provision Operative Account' : modalType === 'edit' ? 'Modify Operative Configuration' : 'Security Credential Reset'}
+            </h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+              {modalType === 'create' ? 'Enter identity and scoping parameters for the new system operative.' : modalType === 'edit' ? 'Update operational roles, regional scoping, and team assignment.' : 'Generate a new cryptographic credential for the selected operative.'}
+            </p>
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               
               {modalType !== 'password' && (
                 <>
-                  <div>
-                    <label>Username</label>
-                    <input required disabled={modalType==='edit'} value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Operative Username</label>
+                    <input 
+                      required 
+                      disabled={modalType === 'edit'} 
+                      value={formData.username} 
+                      onChange={e => setFormData({...formData, username: e.target.value})} 
+                      placeholder="agent_alpha"
+                    />
                   </div>
-                  <div>
-                    <label>Full Name</label>
-                    <input required value={formData.full_name} onChange={e => setFormData({...formData, full_name: e.target.value})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Full Name</label>
+                    <input 
+                      required 
+                      value={formData.full_name} 
+                      onChange={e => setFormData({...formData, full_name: e.target.value})} 
+                      placeholder="Arthur Pendelton"
+                    />
                   </div>
-                  <div>
-                    <label>Email</label>
-                    <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Email Address</label>
+                    <input 
+                      required 
+                      type="email" 
+                      value={formData.email} 
+                      onChange={e => setFormData({...formData, email: e.target.value})} 
+                      placeholder="arthur@enterprise.com"
+                    />
                   </div>
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'15px'}}>
-                    <div>
-                      <label>Role</label>
-                      <select value={formData.role_name} onChange={e => setFormData({...formData, role_name: e.target.value})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}}>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>System Role</label>
+                      <select value={formData.role_name} onChange={e => setFormData({...formData, role_name: e.target.value})}>
                         <option value="FIELD_AGENT">Field Agent</option>
                         <option value="TEAM_LEAD">Team Lead</option>
                         <option value="REGIONAL_MANAGER">Regional Manager</option>
@@ -150,26 +321,27 @@ function Users() {
                         <option value="ADMIN">Admin</option>
                       </select>
                     </div>
-                    <div>
-                      <label>Status</label>
-                      <select value={formData.is_active} onChange={e => setFormData({...formData, is_active: e.target.value === 'true'})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}}>
-                        <option value="true">Active</option>
-                        <option value="false">Inactive</option>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Initial Status</label>
+                      <select value={formData.is_active} onChange={e => setFormData({...formData, is_active: e.target.value === 'true'})}>
+                        <option value="true">Active (Provisioned)</option>
+                        <option value="false">Suspended</option>
                       </select>
                     </div>
                   </div>
-                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'15px'}}>
-                    <div>
-                      <label>Region</label>
-                      <select value={formData.region_id} onChange={e => setFormData({...formData, region_id: e.target.value})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}}>
-                        <option value="">None</option>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Geographic Region</label>
+                      <select value={formData.region_id} onChange={e => setFormData({...formData, region_id: e.target.value})}>
+                        <option value="">Global / Unscoped</option>
                         {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
                       </select>
                     </div>
-                    <div>
-                      <label>Team</label>
-                      <select value={formData.team_id} onChange={e => setFormData({...formData, team_id: e.target.value})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}}>
-                        <option value="">None</option>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Team Assignment</label>
+                      <select value={formData.team_id} onChange={e => setFormData({...formData, team_id: e.target.value})}>
+                        <option value="">Unassigned</option>
                         {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                       </select>
                     </div>
@@ -178,72 +350,26 @@ function Users() {
               )}
 
               {(modalType === 'create' || modalType === 'password') && (
-                <div>
-                  <label>{modalType === 'create' ? 'Initial Password' : 'New Password'}</label>
-                  <input required type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>{modalType === 'create' ? 'Cryptographic Password' : 'New Cryptographic Password'}</label>
+                  <input 
+                    required 
+                    type="password" 
+                    value={formData.password} 
+                    onChange={e => setFormData({...formData, password: e.target.value})} 
+                    placeholder="••••••••••••"
+                  />
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                <button type="submit" style={{ flex: 1 }}>{modalType === 'create' ? 'Create User' : 'Save Changes'}</button>
-                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, background: 'var(--border-color)' }}>Cancel</button>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                <button type="submit" style={{ flex: 1, padding: '12px' }}>{modalType === 'create' ? 'Execute Provisioning' : 'Commit Configuration'}</button>
+                <button type="button" onClick={() => setShowModal(false)} className="btn-outline" style={{ flex: 1, padding: '12px' }}>Abort</button>
               </div>
             </form>
           </div>
         </div>
       )}
-      
-      <div className="card">
-        <table style={{ borderCollapse: 'separate', borderSpacing: '0 8px' }}>
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Role</th>
-              <th>Region / Team</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(user => (
-              <tr key={user.id} style={{ background: 'var(--border-color)' }}>
-                <td style={{ borderRadius: '8px 0 0 8px' }}>
-                  <div style={{ fontWeight: '600' }}>{user.username}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{user.email}</div>
-                </td>
-                <td>
-                  <span className={`status-badge`} style={{ background: 'var(--border-color)', color: '#646cff', border: '1px solid var(--text-secondary)' }}>
-                    {user.role}
-                  </span>
-                </td>
-                <td>
-                  <div style={{ fontSize: '13px' }}>{user.region || 'No Region'}</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{user.team || 'No Team'}</div>
-                </td>
-                <td>
-                  <button 
-                    onClick={() => toggleStatus(user)}
-                    style={{ background: 'transparent', padding: '4px', display: 'flex', alignItems: 'center', gap: '5px', color: user.is_active ? 'var(--success-color)' : 'var(--danger-color)' }}
-                  >
-                    {user.is_active ? <CheckCircle size={16} /> : <XCircle size={16} />}
-                    {user.is_active ? 'Active' : 'Inactive'}
-                  </button>
-                </td>
-                <td style={{ borderRadius: '0 8px 8px 0' }}>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button onClick={() => handleOpenModal('edit', user)} title="Edit User" style={{ background: 'var(--border-color)', padding: '6px' }}>
-                      <Edit2 size={16} />
-                    </button>
-                    <button onClick={() => handleOpenModal('password', user)} title="Reset Password" style={{ background: 'var(--border-color)', padding: '6px' }}>
-                      <Key size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }
