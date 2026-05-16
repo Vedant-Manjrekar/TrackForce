@@ -129,20 +129,20 @@ function Users() {
                 <>
                   <div>
                     <label>Username</label>
-                    <input required disabled={modalType==='edit'} value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} style={{width:'100%', padding:'10px', background:'#121212', border:'1px solid #333', borderRadius:'8px', color:'white'}} />
+                    <input required disabled={modalType==='edit'} value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}} />
                   </div>
                   <div>
                     <label>Full Name</label>
-                    <input required value={formData.full_name} onChange={e => setFormData({...formData, full_name: e.target.value})} style={{width:'100%', padding:'10px', background:'#121212', border:'1px solid #333', borderRadius:'8px', color:'white'}} />
+                    <input required value={formData.full_name} onChange={e => setFormData({...formData, full_name: e.target.value})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}} />
                   </div>
                   <div>
                     <label>Email</label>
-                    <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{width:'100%', padding:'10px', background:'#121212', border:'1px solid #333', borderRadius:'8px', color:'white'}} />
+                    <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}} />
                   </div>
                   <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'15px'}}>
                     <div>
                       <label>Role</label>
-                      <select value={formData.role_name} onChange={e => setFormData({...formData, role_name: e.target.value})} style={{width:'100%', padding:'10px', background:'#121212', border:'1px solid #333', borderRadius:'8px', color:'white'}}>
+                      <select value={formData.role_name} onChange={e => setFormData({...formData, role_name: e.target.value})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}}>
                         <option value="FIELD_AGENT">Field Agent</option>
                         <option value="TEAM_LEAD">Team Lead</option>
                         <option value="REGIONAL_MANAGER">Regional Manager</option>
@@ -152,7 +152,7 @@ function Users() {
                     </div>
                     <div>
                       <label>Status</label>
-                      <select value={formData.is_active} onChange={e => setFormData({...formData, is_active: e.target.value === 'true'})} style={{width:'100%', padding:'10px', background:'#121212', border:'1px solid #333', borderRadius:'8px', color:'white'}}>
+                      <select value={formData.is_active} onChange={e => setFormData({...formData, is_active: e.target.value === 'true'})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}}>
                         <option value="true">Active</option>
                         <option value="false">Inactive</option>
                       </select>
@@ -161,14 +161,14 @@ function Users() {
                   <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'15px'}}>
                     <div>
                       <label>Region</label>
-                      <select value={formData.region_id} onChange={e => setFormData({...formData, region_id: e.target.value})} style={{width:'100%', padding:'10px', background:'#121212', border:'1px solid #333', borderRadius:'8px', color:'white'}}>
+                      <select value={formData.region_id} onChange={e => setFormData({...formData, region_id: e.target.value})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}}>
                         <option value="">None</option>
                         {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
                       </select>
                     </div>
                     <div>
                       <label>Team</label>
-                      <select value={formData.team_id} onChange={e => setFormData({...formData, team_id: e.target.value})} style={{width:'100%', padding:'10px', background:'#121212', border:'1px solid #333', borderRadius:'8px', color:'white'}}>
+                      <select value={formData.team_id} onChange={e => setFormData({...formData, team_id: e.target.value})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}}>
                         <option value="">None</option>
                         {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                       </select>
@@ -180,13 +180,13 @@ function Users() {
               {(modalType === 'create' || modalType === 'password') && (
                 <div>
                   <label>{modalType === 'create' ? 'Initial Password' : 'New Password'}</label>
-                  <input required type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} style={{width:'100%', padding:'10px', background:'#121212', border:'1px solid #333', borderRadius:'8px', color:'white'}} />
+                  <input required type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} style={{width:'100%', padding:'10px', background:'var(--bg-color)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}} />
                 </div>
               )}
 
               <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                 <button type="submit" style={{ flex: 1 }}>{modalType === 'create' ? 'Create User' : 'Save Changes'}</button>
-                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, background: '#333' }}>Cancel</button>
+                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, background: 'var(--border-color)' }}>Cancel</button>
               </div>
             </form>
           </div>
@@ -206,24 +206,24 @@ function Users() {
           </thead>
           <tbody>
             {users.map(user => (
-              <tr key={user.id} style={{ background: '#252525' }}>
+              <tr key={user.id} style={{ background: 'var(--border-color)' }}>
                 <td style={{ borderRadius: '8px 0 0 8px' }}>
                   <div style={{ fontWeight: '600' }}>{user.username}</div>
-                  <div style={{ fontSize: '12px', color: '#888' }}>{user.email}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{user.email}</div>
                 </td>
                 <td>
-                  <span className={`status-badge`} style={{ background: '#333', color: '#646cff', border: '1px solid #444' }}>
+                  <span className={`status-badge`} style={{ background: 'var(--border-color)', color: '#646cff', border: '1px solid var(--text-secondary)' }}>
                     {user.role}
                   </span>
                 </td>
                 <td>
                   <div style={{ fontSize: '13px' }}>{user.region || 'No Region'}</div>
-                  <div style={{ fontSize: '11px', color: '#888' }}>{user.team || 'No Team'}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{user.team || 'No Team'}</div>
                 </td>
                 <td>
                   <button 
                     onClick={() => toggleStatus(user)}
-                    style={{ background: 'transparent', padding: '4px', display: 'flex', alignItems: 'center', gap: '5px', color: user.is_active ? '#10b981' : '#ef4444' }}
+                    style={{ background: 'transparent', padding: '4px', display: 'flex', alignItems: 'center', gap: '5px', color: user.is_active ? 'var(--success-color)' : 'var(--danger-color)' }}
                   >
                     {user.is_active ? <CheckCircle size={16} /> : <XCircle size={16} />}
                     {user.is_active ? 'Active' : 'Inactive'}
@@ -231,10 +231,10 @@ function Users() {
                 </td>
                 <td style={{ borderRadius: '0 8px 8px 0' }}>
                   <div style={{ display: 'flex', gap: '10px' }}>
-                    <button onClick={() => handleOpenModal('edit', user)} title="Edit User" style={{ background: '#333', padding: '6px' }}>
+                    <button onClick={() => handleOpenModal('edit', user)} title="Edit User" style={{ background: 'var(--border-color)', padding: '6px' }}>
                       <Edit2 size={16} />
                     </button>
-                    <button onClick={() => handleOpenModal('password', user)} title="Reset Password" style={{ background: '#333', padding: '6px' }}>
+                    <button onClick={() => handleOpenModal('password', user)} title="Reset Password" style={{ background: 'var(--border-color)', padding: '6px' }}>
                       <Key size={16} />
                     </button>
                   </div>

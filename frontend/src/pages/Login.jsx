@@ -46,11 +46,11 @@ function Login({ setUser }) {
               onChange={(e) => setPassword(e.target.value)} 
             />
           </div>
-          {error && <p style={{ color: '#ef4444', marginBottom: '16px' }}>{error}</p>}
+          {error && <p style={{ color: 'var(--danger-color)', marginBottom: '16px' }}>{error}</p>}
           <button type="submit" className="auth-submit-btn">Login</button>
         </form>
 
-        <div style={{ marginTop: '32px', fontSize: '13px', color: '#94a3b8', borderTop: '1px solid #333', paddingTop: '20px' }}>
+        <div style={{ marginTop: '32px', fontSize: '13px', color: '#94a3b8', borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
           <p style={{ fontWeight: '600', marginBottom: '8px', color: '#cbd5e1' }}>Demo Accounts (password: password123):</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             <div>• admin</div>

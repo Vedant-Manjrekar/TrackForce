@@ -122,7 +122,7 @@ function TaskList() {
             </div>
             <div style={{ gridColumn: 'span 2', marginTop: '10px' }}>
               <button type="submit" style={{ marginRight: '10px' }}>Save Task</button>
-              <button type="button" style={{ background: '#555' }} onClick={() => setShowModal(false)}>Cancel</button>
+              <button type="button" style={{ background: 'var(--text-secondary)' }} onClick={() => setShowModal(false)}>Cancel</button>
             </div>
           </form>
         </div>

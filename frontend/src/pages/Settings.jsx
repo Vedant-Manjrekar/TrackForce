@@ -88,7 +88,7 @@ function Settings() {
     <div>
       <div style={{ marginBottom: '30px' }}>
         <h1>Global Settings</h1>
-        <p style={{ color: '#888', margin: 0 }}>Manage your personal account information and security credentials.</p>
+        <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Manage your personal account information and security credentials.</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '40px' }}>
@@ -101,7 +101,7 @@ function Settings() {
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px', padding: '15px', borderRadius: '12px',
                 background: activeTab === tab.id ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
-                color: activeTab === tab.id ? '#818cf8' : '#888',
+                color: activeTab === tab.id ? '#818cf8' : 'var(--text-secondary)',
                 border: activeTab === tab.id ? '1px solid rgba(99, 102, 241, 0.2)' : '1px solid transparent',
                 textAlign: 'left', transition: 'all 0.2s', cursor: 'pointer'
               }}
@@ -114,27 +114,27 @@ function Settings() {
 
         {/* Content Area */}
         <div className="card" style={{ minHeight: '500px' }}>
-          <h2 style={{ marginBottom: '25px', paddingBottom: '15px', borderBottom: '1px solid #222' }}>{activeTab}</h2>
+          <h2 style={{ marginBottom: '25px', paddingBottom: '15px', borderBottom: '1px solid var(--border-color)' }}>{activeTab}</h2>
 
           {activeTab === 'Profile' && (
             <form onSubmit={handleUpdateProfile} style={{ display: 'grid', gap: '20px', maxWidth: '500px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div>
                   <label>First Name</label>
-                  <input value={formData.first_name} onChange={e => setFormData({...formData, first_name: e.target.value})} style={{ width: '100%', padding: '12px', background: '#121212', border: '1px solid #333', borderRadius: '8px', color: 'white' }} />
+                  <input value={formData.first_name} onChange={e => setFormData({...formData, first_name: e.target.value})} style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
                 </div>
                 <div>
                   <label>Last Name</label>
-                  <input value={formData.last_name} onChange={e => setFormData({...formData, last_name: e.target.value})} style={{ width: '100%', padding: '12px', background: '#121212', border: '1px solid #333', borderRadius: '8px', color: 'white' }} />
+                  <input value={formData.last_name} onChange={e => setFormData({...formData, last_name: e.target.value})} style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
                 </div>
               </div>
               <div>
                 <label>Email Address</label>
-                <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{ width: '100%', padding: '12px', background: '#121212', border: '1px solid #333', borderRadius: '8px', color: 'white' }} />
+                <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
               </div>
-              <div style={{ background: '#121212', padding: '15px', borderRadius: '12px', border: '1px solid #333' }}>
-                <div style={{ color: '#888', fontSize: '12px' }}>Role</div>
-                <div style={{ fontWeight: 'bold', color: '#6366f1' }}>{userProfile?.role}</div>
+              <div style={{ background: 'var(--bg-color)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Role</div>
+                <div style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>{userProfile?.role}</div>
               </div>
               <button type="submit" disabled={saving} style={{ width: 'fit-content', padding: '12px 30px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {saving ? <RefreshCw size={18} className="animate-spin" /> : <Save size={18} />}
@@ -147,17 +147,17 @@ function Settings() {
             <form onSubmit={handlePasswordReset} style={{ display: 'grid', gap: '20px', maxWidth: '500px' }}>
               <div>
                 <label>New Password</label>
-                <input required type="password" value={formData.new_password} onChange={e => setFormData({...formData, new_password: e.target.value})} style={{ width: '100%', padding: '12px', background: '#121212', border: '1px solid #333', borderRadius: '8px', color: 'white' }} />
+                <input required type="password" value={formData.new_password} onChange={e => setFormData({...formData, new_password: e.target.value})} style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
               </div>
               <div>
                 <label>Confirm New Password</label>
-                <input required type="password" value={formData.confirm_password} onChange={e => setFormData({...formData, confirm_password: e.target.value})} style={{ width: '100%', padding: '12px', background: '#121212', border: '1px solid #333', borderRadius: '8px', color: 'white' }} />
+                <input required type="password" value={formData.confirm_password} onChange={e => setFormData({...formData, confirm_password: e.target.value})} style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#f59e0b', fontSize: '13px', background: 'rgba(245, 158, 11, 0.05)', padding: '12px', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--warning-color)', fontSize: '13px', background: 'rgba(245, 158, 11, 0.05)', padding: '12px', borderRadius: '8px' }}>
                 <AlertTriangle size={16} />
                 <span>Resetting your password will end all active sessions.</span>
               </div>
-              <button type="submit" disabled={saving} style={{ width: 'fit-content', padding: '12px 30px', background: '#ef4444' }}>
+              <button type="submit" disabled={saving} style={{ width: 'fit-content', padding: '12px 30px', background: 'var(--danger-color)' }}>
                 Reset Password
               </button>
             </form>

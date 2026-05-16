@@ -80,7 +80,7 @@ function Signup() {
         <h2>Join FieldOps Pro</h2>
         <p className="auth-subtitle">Create your agent account today.</p>
         
-        {error && <div style={{ color: '#ef4444', marginBottom: '16px', fontSize: '14px' }}>{error}</div>}
+        {error && <div style={{ color: 'var(--danger-color)', marginBottom: '16px', fontSize: '14px' }}>{error}</div>}
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">

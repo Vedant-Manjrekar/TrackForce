@@ -82,7 +82,7 @@ function TaskDetail() {
               placeholder="Add visit notes here..." 
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              style={{ width: '100%', height: '100px', background: '#333', color: 'white', border: '1px solid #444', padding: '10px', marginBottom: '10px' }}
+              style={{ width: '100%', height: '100px', background: 'var(--border-color)', color: 'var(--text-primary)', border: '1px solid var(--text-secondary)', padding: '10px', marginBottom: '10px' }}
             />
             <button 
               onClick={() => handleCompleteVisit(activeVisit.id)} 
@@ -103,7 +103,7 @@ function TaskDetail() {
           </div>
           <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
              <div style={{ flex: 1, padding: '10px', background: '#111', borderRadius: '4px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#888', marginBottom: '5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-secondary)', marginBottom: '5px' }}>
                   <MessageSquare size={16} /> <strong>Agent Notes</strong>
                 </div>
                 <p>{visit.notes}</p>
@@ -115,7 +115,7 @@ function TaskDetail() {
                 <p style={{ fontStyle: 'italic' }}>{visit.ai_summary}</p>
                 <p><strong>Recommendation:</strong> {visit.ai_recommendation}</p>
                 <p><strong>Risk Level:</strong> 
-                  <span style={{ color: visit.ai_risk_flag === 'HIGH' ? '#ef4444' : visit.ai_risk_flag === 'MEDIUM' ? '#f59e0b' : '#10b981', marginLeft: '5px' }}>
+                  <span style={{ color: visit.ai_risk_flag === 'HIGH' ? 'var(--danger-color)' : visit.ai_risk_flag === 'MEDIUM' ? 'var(--warning-color)' : 'var(--success-color)', marginLeft: '5px' }}>
                     {visit.ai_risk_flag}
                   </span>
                 </p>

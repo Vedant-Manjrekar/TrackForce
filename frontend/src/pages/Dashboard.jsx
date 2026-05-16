@@ -13,7 +13,8 @@ import {
   Map as MapIcon,
   PlayCircle,
   Eye,
-  Calendar
+  Calendar,
+  ArrowRight
 } from 'lucide-react';
 
 function Dashboard({ user }) {
@@ -34,143 +35,206 @@ function Dashboard({ user }) {
     fetchStats();
   }, []);
 
-  if (loading) return <div className="p-4">Syncing operational data...</div>;
+  if (loading) return (
+    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontFamily: 'var(--font-heading)' }}>
+      Gathering Intelligence...
+    </div>
+  );
 
   const isAgent = user?.role === 'FIELD_AGENT';
 
-  const adminCards = [
-    { title: 'Total Users', value: stats?.total_users, icon: <Users size={20} />, color: '#6366f1' },
-    { title: 'Total Tasks', value: stats?.total_tasks, icon: <ListTodo size={20} />, color: '#818cf8' },
-    { title: 'Pending Tasks', value: stats?.pending_tasks, icon: <Clock size={20} />, color: '#f59e0b' },
-    { title: 'Completed Visits', value: stats?.completed_visits, icon: <CheckCircle2 size={20} />, color: '#10b981' },
-    { title: 'Active Agents', value: stats?.active_agents, icon: <UserCheck size={20} />, color: '#06b6d4' },
-    { title: 'High-Risk Visits', value: stats?.high_risk_visits, icon: <AlertOctagon size={20} />, color: '#ef4444' },
-  ];
-
-  const agentCards = [
-    { title: 'Assigned Tasks', value: stats?.total_tasks, icon: <ListTodo size={20} />, color: '#6366f1' },
-    { title: 'Pending Tasks', value: stats?.pending_tasks, icon: <Clock size={20} />, color: '#f59e0b' },
-    { title: 'Completed Visits', value: stats?.completed_visits, icon: <CheckCircle2 size={20} />, color: '#10b981' },
-    { title: "Today's Visits", value: stats?.todays_visits, icon: <Calendar size={20} />, color: '#06b6d4' },
-  ];
-
-  const statCards = isAgent ? agentCards : adminCards;
-
   return (
     <div>
-      <div style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <header style={{ marginBottom: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid var(--border-color)', paddingBottom: '24px' }}>
         <div>
-          <h1>{isAgent ? 'My Field Dashboard' : 'Operational Dashboard'}</h1>
-          <p style={{ color: '#888', margin: 0 }}>
-            {isAgent ? `Welcome back, ${user.username}. Here is your field activity summary.` : 'Real-time summary of field force activities and performance metrics.'}
-          </p>
+          <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '700', color: 'var(--primary-color)', marginBottom: '8px' }}>
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+          </div>
+          <h1 style={{ fontSize: '56px', margin: 0, lineHeight: '0.9', maxWidth: '600px' }}>
+            {isAgent ? 'Field Activity & Operations' : 'Global Command Center'}
+          </h1>
         </div>
         {isAgent && (
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '16px' }}>
             <Link to="/tasks" style={{ textDecoration: 'none' }}>
-              <button style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#6366f1' }}>
-                <PlayCircle size={18} /> Start Visit
+              <button className="btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Eye size={18} /> View Tasks
               </button>
             </Link>
             <Link to="/tasks" style={{ textDecoration: 'none' }}>
-              <button style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#2a2a2a' }}>
-                <Eye size={18} /> View My Tasks
+              <button style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <PlayCircle size={18} /> Start Visit
               </button>
             </Link>
           </div>
         )}
-      </div>
+      </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${isAgent ? '250px' : '200px'}, 1fr))`, gap: '20px', marginBottom: '30px' }}>
-        {statCards.map((card, index) => (
-          <div key={index} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <div style={{ background: `${card.color}20`, color: card.color, width: '40px', height: '40px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {card.icon}
+      {/* Asymmetrical Top Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '32px', marginBottom: '48px' }}>
+        
+        {/* Massive Hero Stat Card */}
+        <div className="card" style={{ background: 'var(--primary-color)', borderColor: 'var(--primary-color)', color: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '40px' }}>
+          <div className="editorial-badge" style={{ background: 'var(--surface-color)', color: 'var(--text-primary)' }}>Priority Metric</div>
+          <div>
+            <div style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '700', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {isAgent ? <ListTodo size={18}/> : <CheckCircle2 size={18}/>}
+              {isAgent ? 'Total Assigned Tasks' : 'Total Completed Visits'}
             </div>
-            <div style={{ fontSize: '14px', color: '#888' }}>{card.title}</div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold' }}>{card.value || 0}</div>
+            <div style={{ fontSize: '96px', fontFamily: 'var(--font-heading)', lineHeight: '1', margin: '-10px 0 0 -5px' }}>
+              {isAgent ? stats?.total_tasks : stats?.completed_visits || 0}
+            </div>
           </div>
-        ))}
+          <div style={{ borderTop: '2px solid rgba(255,255,255,0.2)', paddingTop: '24px', marginTop: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '14px', fontWeight: '500' }}>Overall progression</span>
+            <ArrowRight size={20} />
+          </div>
+        </div>
+
+        {/* Vertical Stack of Secondary Stats */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Clock size={16} /> Pending Tasks
+            </div>
+            <div style={{ fontSize: '48px', fontFamily: 'var(--font-heading)', color: 'var(--warning-color)', lineHeight: 1 }}>
+              {stats?.pending_tasks || 0}
+            </div>
+          </div>
+          <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {isAgent ? <Calendar size={16}/> : <UserCheck size={16}/>}
+              {isAgent ? "Today's Visits" : "Active Agents"}
+            </div>
+            <div style={{ fontSize: '48px', fontFamily: 'var(--font-heading)', color: 'var(--success-color)', lineHeight: 1 }}>
+              {isAgent ? stats?.todays_visits : stats?.active_agents || 0}
+            </div>
+          </div>
+        </div>
+
+        {/* Third Column Stats */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          {!isAgent && (
+            <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Users size={16} /> Total Users
+              </div>
+              <div style={{ fontSize: '48px', fontFamily: 'var(--font-heading)', lineHeight: 1 }}>
+                {stats?.total_users || 0}
+              </div>
+            </div>
+          )}
+          <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', background: 'var(--danger-color)', color: '#fff', borderColor: 'var(--danger-color)' }}>
+            <div style={{ fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AlertOctagon size={16} /> High-Risk
+            </div>
+            <div style={{ fontSize: '48px', fontFamily: 'var(--font-heading)', lineHeight: 1 }}>
+              {stats?.high_risk_visits || 0}
+            </div>
+          </div>
+        </div>
+
       </div>
 
       {!isAgent && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginBottom: '30px' }}>
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-              <BarChart size={18} style={{ color: '#6366f1' }} />
-              <h3 style={{ margin: 0 }}>Task Distribution</h3>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              {stats?.task_distribution?.map(item => (
-                <div key={item.status} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  <div style={{ width: '100px', fontSize: '13px' }}>{item.status}</div>
-                  <div style={{ flex: 1, height: '10px', background: '#121212', borderRadius: '5px', overflow: 'hidden' }}>
-                    <div style={{ 
-                      width: `${(item.count / stats.total_tasks) * 100}%`, 
-                      height: '100%', 
-                      background: item.status === 'COMPLETED' ? '#10b981' : item.status === 'PENDING' ? '#f59e0b' : '#6366f1' 
-                    }}></div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '32px', marginBottom: '48px' }}>
+          
+          <div className="card" style={{ padding: '40px' }}>
+            <h3 style={{ fontSize: '24px', margin: '0 0 32px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <MapIcon size={24} style={{ color: 'var(--primary-color)' }} />
+              Region Performance
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {stats?.region_performance?.map((item, index) => (
+                <div key={item.region__name || index}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px', fontWeight: '600' }}>
+                    <span>{item.region__name || 'Unknown Zone'}</span>
+                    <span>{item.count}</span>
                   </div>
-                  <div style={{ fontSize: '13px', fontWeight: 'bold' }}>{item.count}</div>
+                  <div style={{ height: '4px', background: 'var(--surface-hover)', width: '100%', position: 'relative' }}>
+                    <div style={{ 
+                      position: 'absolute', top: 0, left: 0, bottom: 0, 
+                      width: `${(item.count / Math.max(1, stats.total_tasks)) * 100}%`,
+                      background: 'var(--text-primary)'
+                    }} />
+                  </div>
                 </div>
               ))}
+              {(!stats?.region_performance || stats.region_performance.length === 0) && (
+                <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No region data available.</div>
+              )}
             </div>
           </div>
 
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-              <MapIcon size={18} style={{ color: '#818cf8' }} />
-              <h3 style={{ margin: 0 }}>Region Performance</h3>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              {stats?.region_performance?.map(item => (
-                <div key={item.region__name} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  <div style={{ width: '100px', fontSize: '13px' }}>{item.region__name || 'Unknown'}</div>
-                  <div style={{ flex: 1, height: '10px', background: '#121212', borderRadius: '5px', overflow: 'hidden' }}>
-                    <div style={{ 
-                      width: `${(item.count / stats.total_tasks) * 100}%`, 
-                      height: '100%', 
-                      background: '#818cf8' 
-                    }}></div>
+          <div className="card" style={{ padding: '40px' }}>
+            <h3 style={{ fontSize: '24px', margin: '0 0 32px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <BarChart size={24} style={{ color: 'var(--primary-color)' }} />
+              Task Distribution Matrix
+            </h3>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
+              {stats?.task_distribution?.map(item => {
+                let color = 'var(--text-primary)';
+                if (item.status === 'COMPLETED') color = 'var(--success-color)';
+                if (item.status === 'PENDING') color = 'var(--warning-color)';
+
+                return (
+                  <div key={item.status} style={{ flex: '1 1 150px', border: '2px solid var(--border-color)', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <div style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                      {item.status}
+                    </div>
+                    <div style={{ fontSize: '40px', fontFamily: 'var(--font-heading)', color: color, lineHeight: 1 }}>
+                      {item.count}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '13px', fontWeight: 'bold' }}>{item.count}</div>
-                </div>
-              ))}
+                );
+              })}
+              {(!stats?.task_distribution || stats.task_distribution.length === 0) && (
+                <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No task data available.</div>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      <div className="card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-          <Activity size={18} style={{ color: '#ef4444' }} />
-          <h3 style={{ margin: 0 }}>{isAgent ? 'My Recent Activities' : 'Recent Activities'}</h3>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+      {/* Activity Log */}
+      <div style={{ marginTop: '48px' }}>
+        <h3 style={{ fontSize: '32px', borderBottom: '2px solid var(--border-color)', paddingBottom: '16px', marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <Activity size={28} />
+          {isAgent ? 'Recent Movements' : 'Live Activity Stream'}
+        </h3>
+        
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           {stats?.recent_activities?.map((activity, index) => (
             <div key={activity.id} style={{ 
               display: 'flex', 
-              alignItems: 'center', 
-              gap: '15px', 
-              padding: '12px', 
-              borderBottom: index === stats.recent_activities.length - 1 ? 'none' : '1px solid #121212',
-              fontSize: '14px'
+              alignItems: 'flex-start', 
+              gap: '24px', 
+              padding: '24px 0', 
+              borderBottom: '1px solid var(--border-color)'
             }}>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#6366f1' }}></div>
+              <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-secondary)', width: '60px', paddingTop: '4px' }}>
+                {new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+              </div>
+              
+              <div style={{ 
+                width: '12px', height: '12px', 
+                background: 'var(--primary-color)', 
+                marginTop: '6px',
+                outline: '2px solid var(--bg-color)',
+                outlineOffset: '-2px'
+              }} />
+              
               <div style={{ flex: 1 }}>
-                <span style={{ fontWeight: 'bold', color: '#fff' }}>{activity.actor__username}</span>
-                <span style={{ color: '#888' }}> {activity.action.toLowerCase()} </span>
-                <span style={{ color: '#cbd5e1' }}>
+                <span style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '16px' }}>@{activity.actor__username}</span>
+                <span style={{ color: 'var(--text-secondary)', margin: '0 8px', fontStyle: 'italic' }}>— {activity.action.toLowerCase()} —</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: '500' }}>
                   {activity.details?.title || activity.details?.assignee || activity.details?.task_title || JSON.stringify(activity.details)}
                 </span>
-              </div>
-              <div style={{ fontSize: '12px', color: '#666' }}>
-                {new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
           ))}
           {(!stats?.recent_activities || stats.recent_activities.length === 0) && (
-            <div style={{ textAlign: 'center', padding: '20px', color: '#444' }}>No recent activities found.</div>
+            <div style={{ padding: '40px 0', color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '16px' }}>The system is quiet. No recent activities recorded.</div>
           )}
         </div>
       </div>
