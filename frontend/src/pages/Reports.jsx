@@ -12,6 +12,8 @@ function Reports() {
       try {
         const response = await api.get('/reports/summary/');
         setData(response.data);
+        // By default, keep the dropdowns closed
+        setExpandedRegions({});
       } catch (err) {
         console.error("Failed to fetch reports", err);
       } finally {
@@ -37,7 +39,7 @@ function Reports() {
     }
   };
 
-  if (loading) return <div className="p-4">Generating operational intelligence...</div>;
+  if (loading) return <div style={{ padding: '40px', color: 'var(--text-secondary)', fontSize: '15px' }}>Generating operational intelligence...</div>;
 
   return (
     <div>
@@ -87,13 +89,13 @@ function Reports() {
 
         <div className="card" style={{ background: 'linear-gradient(145deg, var(--surface-hover), var(--bg-color))', border: '1px solid var(--border-color)', borderLeft: '4px solid var(--danger-color)', padding: '20px', borderRadius: '12px' }}>
           <div style={{ color: 'var(--text-secondary)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>Critical Tasks</span>
+            <span>Pending Tasks</span>
             <AlertCircle size={16} style={{ color: 'var(--danger-color)' }} />
           </div>
           <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--danger-color)' }}>
             {data?.task_distribution?.find(t => t.status === 'PENDING')?.count || 0}
           </div>
-          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '5px' }}>Require immediate intervention</div>
+          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '5px' }}>Require field allocation</div>
         </div>
       </div>
 
@@ -109,7 +111,7 @@ function Reports() {
               </div>
               <div>
                 <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)' }}>Pending Tasks by Region</h3>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>Click on a region to view specific pending tasks</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>Showing all active pending tasks across geographic sectors</div>
               </div>
             </div>
             <span style={{ fontSize: '12px', background: 'var(--border-color)', padding: '4px 10px', borderRadius: '12px', color: 'var(--text-secondary)', fontWeight: '600' }}>
@@ -240,7 +242,7 @@ function Reports() {
                 <Users size={20} />
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)' }}>Agent Efficiency</h3>
+                <h3 style={{ margin: "0", fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)' }}>Agent Efficiency</h3>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>Average completion time per field agent</div>
               </div>
             </div>

@@ -118,7 +118,7 @@ function Users() {
     return matchesSearch && matchesRole;
   });
 
-  if (loading) return <div style={{ padding: '40px', color: 'var(--text-secondary)', fontSize: '15px' }}>Retrieving user database...</div>;
+  if (loading) return <div style={{ padding: '40px', color: 'var(--text-secondary)', fontSize: '15px' }}>Loading users...</div>;
 
   return (
     <div>
@@ -126,13 +126,13 @@ function Users() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
             <span className="enterprise-badge">
-              <UsersIcon size={14} /> Directory Governance
+              <UsersIcon size={14} /> User Directory
             </span>
           </div>
           <h1 style={{ fontSize: '2rem', margin: 0, fontWeight: '800', letterSpacing: '-0.03em' }}>User Management</h1>
         </div>
         <button onClick={() => handleOpenModal('create')} style={{ padding: '12px 24px', fontSize: '14px' }}>
-          <UserPlus size={18} /> Provision User
+          <UserPlus size={18} /> Add User
         </button>
       </header>
 
@@ -173,11 +173,11 @@ function Users() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              <th style={{ padding: '16px 24px' }}>User Operative</th>
-              <th style={{ padding: '16px 24px' }}>System Role</th>
-              <th style={{ padding: '16px 24px' }}>Assignment Scoping</th>
+              <th style={{ padding: '16px 24px' }}>User</th>
+              <th style={{ padding: '16px 24px' }}>Role</th>
+              <th style={{ padding: '16px 24px' }}>Region / Team</th>
               <th style={{ padding: '16px 24px' }}>Status</th>
-              <th style={{ padding: '16px 24px', textAlign: 'right' }}>Governance Actions</th>
+              <th style={{ padding: '16px 24px', textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -194,8 +194,8 @@ function Users() {
                         {user.username?.[0]?.toUpperCase()}
                       </div>
                       <div>
-                        <div style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '14px', marginBottom: '2px' }}>{user.username}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{user.email || 'No email provided'}</div>
+                        <div style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '14.5px', marginBottom: '2px' }}>{user.username}</div>
+                        <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{user.email || 'No email'}</div>
                       </div>
                     </div>
                   </td>
@@ -205,8 +205,8 @@ function Users() {
                     </span>
                   </td>
                   <td style={{ padding: '16px 24px' }}>
-                    <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '2px' }}>{user.region || 'Global Access'}</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>{user.team || 'Unassigned Team'}</div>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '2px' }}>{user.region || 'Global'}</div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>{user.team || 'None'}</div>
                   </td>
                   <td style={{ padding: '16px 24px' }}>
                     <button 
@@ -214,7 +214,7 @@ function Users() {
                       className="btn-outline"
                       style={{ 
                         padding: '6px 12px', 
-                        fontSize: '12px', 
+                        fontSize: '12.5px', 
                         fontWeight: '600',
                         color: user.is_active ? 'var(--success-color)' : 'var(--danger-color)',
                         borderColor: user.is_active ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)',
@@ -223,7 +223,7 @@ function Users() {
                       title="Toggle Active Status"
                     >
                       {user.is_active ? <CheckCircle size={14} /> : <XCircle size={14} />}
-                      {user.is_active ? 'Active' : 'Suspended'}
+                      {user.is_active ? 'Active' : 'Inactive'}
                     </button>
                   </td>
                   <td style={{ padding: '16px 24px', textAlign: 'right' }}>
@@ -232,7 +232,7 @@ function Users() {
                         onClick={() => handleOpenModal('edit', user)} 
                         className="btn-outline" 
                         style={{ padding: '8px', borderRadius: 'var(--radius-sm)' }}
-                        title="Modify User Configuration"
+                        title="Edit User"
                       >
                         <Edit2 size={16} />
                       </button>
@@ -240,7 +240,7 @@ function Users() {
                         onClick={() => handleOpenModal('password', user)} 
                         className="btn-outline" 
                         style={{ padding: '8px', borderRadius: 'var(--radius-sm)' }}
-                        title="Force Password Reset"
+                        title="Reset Password"
                       >
                         <Key size={16} />
                       </button>
@@ -252,7 +252,7 @@ function Users() {
             {filteredUsers.length === 0 && (
               <tr>
                 <td colSpan="5" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                  No operatives match the specified filter criteria.
+                  No users found.
                 </td>
               </tr>
             )}
@@ -270,10 +270,10 @@ function Users() {
         }}>
           <div className="card" style={{ width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto', padding: '36px', boxShadow: 'var(--shadow-xl)', border: '1px solid var(--border-color)' }}>
             <h2 style={{ fontSize: '1.5rem', marginBottom: '8px', fontWeight: '800' }}>
-              {modalType === 'create' ? 'Provision Operative Account' : modalType === 'edit' ? 'Modify Operative Configuration' : 'Security Credential Reset'}
+              {modalType === 'create' ? 'Create New User' : modalType === 'edit' ? 'Edit User' : 'Reset Password'}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
-              {modalType === 'create' ? 'Enter identity and scoping parameters for the new system operative.' : modalType === 'edit' ? 'Update operational roles, regional scoping, and team assignment.' : 'Generate a new cryptographic credential for the selected operative.'}
+              {modalType === 'create' ? 'Enter the details for the new user account.' : modalType === 'edit' ? 'Update role, region, and team assignments.' : 'Set a new password for this user.'}
             </p>
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -281,13 +281,13 @@ function Users() {
               {modalType !== 'password' && (
                 <>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Operative Username</label>
+                    <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Username</label>
                     <input 
                       required 
                       disabled={modalType === 'edit'} 
                       value={formData.username} 
                       onChange={e => setFormData({...formData, username: e.target.value})} 
-                      placeholder="agent_alpha"
+                      placeholder="johndoe"
                     />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -296,23 +296,23 @@ function Users() {
                       required 
                       value={formData.full_name} 
                       onChange={e => setFormData({...formData, full_name: e.target.value})} 
-                      placeholder="Arthur Pendelton"
+                      placeholder="John Doe"
                     />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Email Address</label>
+                    <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Email</label>
                     <input 
                       required 
                       type="email" 
                       value={formData.email} 
                       onChange={e => setFormData({...formData, email: e.target.value})} 
-                      placeholder="arthur@enterprise.com"
+                      placeholder="john@example.com"
                     />
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>System Role</label>
+                      <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Role</label>
                       <select value={formData.role_name} onChange={e => setFormData({...formData, role_name: e.target.value})}>
                         <option value="FIELD_AGENT">Field Agent</option>
                         <option value="TEAM_LEAD">Team Lead</option>
@@ -322,26 +322,26 @@ function Users() {
                       </select>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Initial Status</label>
+                      <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Status</label>
                       <select value={formData.is_active} onChange={e => setFormData({...formData, is_active: e.target.value === 'true'})}>
-                        <option value="true">Active (Provisioned)</option>
-                        <option value="false">Suspended</option>
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
                       </select>
                     </div>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Geographic Region</label>
+                      <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Region</label>
                       <select value={formData.region_id} onChange={e => setFormData({...formData, region_id: e.target.value})}>
-                        <option value="">Global / Unscoped</option>
+                        <option value="">None (Global)</option>
                         {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
                       </select>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Team Assignment</label>
+                      <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Team</label>
                       <select value={formData.team_id} onChange={e => setFormData({...formData, team_id: e.target.value})}>
-                        <option value="">Unassigned</option>
+                        <option value="">None</option>
                         {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                       </select>
                     </div>
@@ -351,7 +351,7 @@ function Users() {
 
               {(modalType === 'create' || modalType === 'password') && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>{modalType === 'create' ? 'Cryptographic Password' : 'New Cryptographic Password'}</label>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>{modalType === 'create' ? 'Password' : 'New Password'}</label>
                   <input 
                     required 
                     type="password" 
@@ -363,8 +363,8 @@ function Users() {
               )}
 
               <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-                <button type="submit" style={{ flex: 1, padding: '12px' }}>{modalType === 'create' ? 'Execute Provisioning' : 'Commit Configuration'}</button>
-                <button type="button" onClick={() => setShowModal(false)} className="btn-outline" style={{ flex: 1, padding: '12px' }}>Abort</button>
+                <button type="submit" style={{ flex: 1, padding: '12px' }}>{modalType === 'create' ? 'Create User' : 'Save Changes'}</button>
+                <button type="button" onClick={() => setShowModal(false)} className="btn-outline" style={{ flex: 1, padding: '12px' }}>Cancel</button>
               </div>
             </form>
           </div>

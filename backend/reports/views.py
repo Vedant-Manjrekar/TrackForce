@@ -29,8 +29,8 @@ class ReportSummaryView(APIView):
             visits_qs = visits_qs.filter(task__team=user.profile.team)
         # Auditor and Admin see all
 
-        # 1. Pending tasks by region
-        pending_tasks = tasks_qs.filter(status='PENDING').select_related('region', 'assigned_to', 'team')
+        # 1. Pending tasks by region (Includes PENDING, ASSIGNED, IN_PROGRESS)
+        pending_tasks = tasks_qs.filter(status__in=['PENDING', 'ASSIGNED', 'IN_PROGRESS']).select_related('region', 'assigned_to', 'team')
         pending_by_region_dict = {}
         for task in pending_tasks:
             r_name = task.region.name if task.region else 'Unassigned Region'
@@ -47,23 +47,23 @@ class ReportSummaryView(APIView):
             })
         pending_tasks_by_region = list(pending_by_region_dict.values())
         
-        # 2. Average completion time per field agent
-        # Completion time = visit.end_time - visit.start_time
-        avg_completion_time = visits_qs.filter(status='COMPLETED').values('agent__username').annotate(
-            avg_duration=Avg(F('end_time') - F('start_time'))
-        )
-        
-        # Convert durations to something readable
-        for item in avg_completion_time:
-            avg_dur = item['avg_duration']
-            if avg_dur:
-                if hasattr(avg_dur, 'total_seconds'):
-                    item['avg_duration_minutes'] = avg_dur.total_seconds() / 60
-                else:
-                    # In some DBs (like SQLite with certain drivers), this might be a numeric value
-                    item['avg_duration_minutes'] = float(avg_dur) / 60
-            else:
-                item['avg_duration_minutes'] = 0
+        # 2. Average completion time per field agent (Calculated in Python for 100% SQLite & DB compatibility)
+        completed_visits = visits_qs.filter(status='COMPLETED').select_related('agent')
+        agent_durations = {}
+        for v in completed_visits:
+            if v.agent and v.start_time and v.end_time:
+                username = v.agent.username
+                dur_minutes = (v.end_time - v.start_time).total_seconds() / 60.0
+                if username not in agent_durations:
+                    agent_durations[username] = []
+                agent_durations[username].append(dur_minutes)
+                
+        avg_completion_time = []
+        for username, durations in agent_durations.items():
+            avg_completion_time.append({
+                'agent__username': username,
+                'avg_duration_minutes': sum(durations) / len(durations)
+            })
 
         # 3. Visits completed in last 7 days
         seven_days_ago = timezone.now() - timedelta(days=7)
@@ -112,7 +112,7 @@ class DashboardSummaryView(APIView):
 
         return Response({
             'total_tasks': tasks.count(),
-            'pending_tasks': tasks.filter(status='PENDING').count(),
+            'pending_tasks': tasks.filter(status__in=['PENDING', 'ASSIGNED', 'IN_PROGRESS']).count(),
             'completed_tasks': tasks.filter(status='COMPLETED').count(),
             'active_visits': visits.filter(status='STARTED').count(),
             'completed_visits': visits.filter(status='COMPLETED').count(),

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -13,13 +13,16 @@ import {
   MapPin,
   Sun,
   Moon,
-  ShieldAlert
+  ShieldAlert,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { useTheme } from './ThemeContext';
 
 function Sidebar({ onLogout, user }) {
   const location = useLocation();
   const { isDarkMode, toggleTheme } = useTheme();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   let menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} strokeWidth={1.75} /> },
@@ -72,25 +75,55 @@ function Sidebar({ onLogout, user }) {
   menuItems = menuItems.filter((v,i,a)=>a.findIndex(t=>(t.path === v.path))===i);
 
   return (
-    <div className="sidebar" style={{ 
+    <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`} style={{ 
       display: 'flex', 
       flexDirection: 'column',
       justifyContent: 'space-between',
-      height: '100%'
+      height: '100%',
+      width: isCollapsed ? '84px' : '260px',
+      padding: isCollapsed ? '28px 16px' : '28px 20px',
+      transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      flexShrink: 0
     }}>
       
       {/* Top Section */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 8px', flexShrink: 0 }}>
-          <div style={{ width: '28px', height: '28px', background: 'var(--primary-gradient)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '14px' }}>
-            F
-          </div>
-          <h2 style={{ margin: '0', fontSize: '20px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-            FieldOps
-          </h2>
+        
+        {/* Header / Collapse Toggle */}
+        <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'space-between', padding: isCollapsed ? '0' : '0 8px', flexShrink: 0 }}>
+          {!isCollapsed ? (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '28px', height: '28px', background: 'var(--primary-gradient)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '14px', flexShrink: 0 }}>
+                  F
+                </div>
+                <h2 style={{ margin: '0', fontSize: '20px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
+                  FieldOps
+                </h2>
+              </div>
+              <button 
+                onClick={() => setIsCollapsed(true)}
+                className="btn-outline"
+                style={{ padding: '6px', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                title="Collapse Sidebar"
+              >
+                <ChevronLeft size={16} />
+              </button>
+            </>
+          ) : (
+            <button 
+              onClick={() => setIsCollapsed(false)}
+              className="btn-outline"
+              style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              title="Expand Sidebar"
+            >
+              <ChevronRight size={18} />
+            </button>
+          )}
         </div>
         
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto', flex: 1, paddingRight: '4px', marginBottom: '20px' }}>
+        {/* Navigation Links */}
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto', flex: 1, paddingRight: isCollapsed ? '0' : '4px', marginBottom: '20px' }}>
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
@@ -100,8 +133,9 @@ function Sidebar({ onLogout, user }) {
                 style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
+                  justifyContent: isCollapsed ? 'center' : 'flex-start',
                   gap: '14px', 
-                  padding: '10px 14px', 
+                  padding: isCollapsed ? '12px' : '10px 14px', 
                   color: isActive ? 'var(--primary-color)' : 'var(--text-secondary)',
                   textDecoration: 'none',
                   fontWeight: isActive ? '600' : '500',
@@ -111,6 +145,7 @@ function Sidebar({ onLogout, user }) {
                   transition: 'all 0.15s ease',
                   flexShrink: 0
                 }}
+                title={isCollapsed ? item.name : undefined}
                 onMouseEnter={e => {
                   if(!isActive) {
                     e.currentTarget.style.background = 'var(--surface-hover)';
@@ -130,7 +165,7 @@ function Sidebar({ onLogout, user }) {
                     transition: 'color 0.15s ease'
                   } 
                 })}
-                {item.name}
+                {!isCollapsed && item.name}
               </Link>
             );
           })}
@@ -138,30 +173,43 @@ function Sidebar({ onLogout, user }) {
       </div>
 
       {/* Bottom Section */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: isCollapsed ? '12px' : '20px' }}>
         
-        <div style={{ padding: '16px', borderRadius: 'var(--radius-md)', background: 'var(--surface-subtle)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '14px' }}>
+        {!isCollapsed ? (
+          <div style={{ padding: '16px', borderRadius: 'var(--radius-md)', background: 'var(--surface-subtle)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{ 
+              width: '40px', height: '40px', 
+              background: 'var(--primary-gradient)', 
+              borderRadius: 'var(--radius-sm)',
+              color: 'white',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: '700', fontSize: '16px', flexShrink: 0
+            }}>
+              {user?.username?.[0]?.toUpperCase() || 'U'}
+            </div>
+            <div style={{ overflow: 'hidden' }}>
+              <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                {user?.username}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '600', marginTop: '2px' }}>
+                {user?.role?.replace('_', ' ')}
+              </div>
+            </div>
+          </div>
+        ) : (
           <div style={{ 
-            width: '40px', height: '40px', 
+            width: '100%', aspectRatio: '1', 
             background: 'var(--primary-gradient)', 
             borderRadius: 'var(--radius-sm)',
             color: 'white',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: '700', fontSize: '16px'
-          }}>
+            fontWeight: '700', fontSize: '16px', flexShrink: 0
+          }} title={`${user?.username} (${user?.role?.replace('_', ' ')})`}>
             {user?.username?.[0]?.toUpperCase() || 'U'}
           </div>
-          <div style={{ overflow: 'hidden' }}>
-            <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-              {user?.username}
-            </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '600', marginTop: '2px' }}>
-              {user?.role?.replace('_', ' ')}
-            </div>
-          </div>
-        </div>
+        )}
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexDirection: isCollapsed ? 'column' : 'row' }}>
           <button 
             onClick={toggleTheme}
             className="btn-outline"
@@ -202,7 +250,7 @@ function Sidebar({ onLogout, user }) {
             }}
             title="Logout"
           >
-            <LogOut size={18} /> Logout
+            <LogOut size={18} /> {!isCollapsed && "Logout"}
           </button>
         </div>
 
