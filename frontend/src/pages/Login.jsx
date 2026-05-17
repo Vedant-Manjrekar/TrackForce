@@ -44,7 +44,8 @@ function Login({ setUser }) {
       flexDirection: 'column', 
       background: 'var(--bg-gradient)',
       position: 'relative',
-      overflow: 'hidden'
+      overflowY: 'auto',
+      overflowX: 'hidden'
     }}>
       
       {/* Ambient Background Glow for Premium Fintech / SaaS Aesthetic */}
@@ -68,7 +69,7 @@ function Login({ setUser }) {
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        padding: '32px 24px',
+        padding: '20px 24px',
         zIndex: 10 
       }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
@@ -90,12 +91,12 @@ function Login({ setUser }) {
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center', 
-        padding: '20px 24px 60px 24px',
+        padding: '10px 24px 40px 24px',
         zIndex: 10 
       }}>
         <div style={{ 
           width: '100%', 
-          maxWidth: '540px', /* Increased width for a grander, spacious feel */
+          maxWidth: '680px', /* Increased width to 680px for a grand, spacious feel */
           background: 'var(--surface-color)', 
           border: '1px solid var(--border-color)', 
           boxShadow: 'var(--shadow-xl)', 
@@ -109,10 +110,10 @@ function Login({ setUser }) {
           <div style={{ height: '4px', background: 'var(--primary-gradient)', width: '100%' }} />
 
           {/* Card Body */}
-          <div style={{ padding: '48px 48px' }}>
+          <div style={{ padding: '36px 48px' }}>
             
             {/* Header */}
-            <div style={{ marginBottom: '36px' }}>
+            <div style={{ marginBottom: '32px' }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '20px', background: 'var(--surface-hover)', border: '1px solid var(--border-color)', fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '18px' }}>
                 <ShieldCheck size={16} style={{ color: 'var(--primary-color)' }} /> Secure Enterprise Gateway
               </div>
@@ -144,7 +145,7 @@ function Login({ setUser }) {
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <label style={{ fontSize: '14.5px', fontWeight: '600', color: 'var(--text-secondary)' }}>Username</label>
                 <div style={{ position: 'relative' }}>
@@ -155,7 +156,7 @@ function Login({ setUser }) {
                     placeholder="Enter your username"
                     value={username} 
                     onChange={(e) => setUsername(e.target.value)} 
-                    style={{ width: '100%', paddingLeft: '52px', paddingRight: '18px', py: '14px', fontSize: '16px' }}
+                    style={{ width: '100%', paddingLeft: '52px', paddingRight: '18px', paddingTop: '14px', paddingBottom: '14px', fontSize: '16px' }}
                   />
                 </div>
               </div>
@@ -173,7 +174,7 @@ function Login({ setUser }) {
                     placeholder="••••••••••••"
                     value={password} 
                     onChange={(e) => setPassword(e.target.value)} 
-                    style={{ width: '100%', paddingLeft: '52px', paddingRight: '18px', py: '14px', fontSize: '16px' }}
+                    style={{ width: '100%', paddingLeft: '52px', paddingRight: '18px', paddingTop: '14px', paddingBottom: '14px', fontSize: '16px' }}
                   />
                 </div>
               </div>
@@ -197,11 +198,11 @@ function Login({ setUser }) {
             </form>
 
             {/* Demo Accounts Panel */}
-            <div style={{ marginTop: '40px', background: 'var(--surface-subtle)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '24px' }}>
+            <div style={{ marginTop: '36px', background: 'var(--surface-subtle)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '18px', fontSize: '14.5px', fontWeight: '700', color: 'var(--text-primary)' }}>
                 <Key size={18} style={{ color: 'var(--primary-color)' }} /> Demo Accounts <span style={{ fontWeight: '400', color: 'var(--text-tertiary)' }}>(password: password123)</span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 {demoAccounts.map(acc => (
                   <div 
                     key={acc.username} 
@@ -229,7 +230,7 @@ function Login({ setUser }) {
             </div>
 
             {/* Footer */}
-            <div style={{ marginTop: '36px', textAlign: 'center', fontSize: '15.5px', color: 'var(--text-secondary)' }}>
+            <div style={{ marginTop: '32px', textAlign: 'center', fontSize: '15.5px', color: 'var(--text-secondary)' }}>
               Don't have an account? <Link to="/signup" style={{ color: 'var(--primary-color)', fontWeight: '600', textDecoration: 'none' }}>Sign up here</Link>
             </div>
 
