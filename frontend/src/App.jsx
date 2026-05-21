@@ -36,6 +36,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('fieldops_cache');
     setUser(null);
     // Force reload to completely wipe React state cache
     window.location.href = '/';

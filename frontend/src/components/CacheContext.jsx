@@ -1,10 +1,27 @@
-import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 
 const CacheContext = createContext();
 
 export function CacheProvider({ children }) {
-  const [cache, setCache] = useState({});
+  const [cache, setCache] = useState(() => {
+    try {
+      const persisted = localStorage.getItem('fieldops_cache');
+      return persisted ? JSON.parse(persisted) : {};
+    } catch (e) {
+      console.error('Failed to parse persisted cache', e);
+      return {};
+    }
+  });
   const inFlightRequests = useRef({});
+
+  // Sync cache state to localStorage whenever it updates
+  useEffect(() => {
+    try {
+      localStorage.setItem('fieldops_cache', JSON.stringify(cache));
+    } catch (e) {
+      console.error('Failed to save cache to localStorage', e);
+    }
+  }, [cache]);
 
   const getCachedData = useCallback((key) => {
     return cache[key]?.data;
@@ -19,6 +36,11 @@ export function CacheProvider({ children }) {
 
   const clearCache = useCallback(() => {
     setCache({});
+    try {
+      localStorage.removeItem('fieldops_cache');
+    } catch (e) {
+      console.error('Failed to clear cache from localStorage', e);
+    }
     inFlightRequests.current = {};
   }, []);
 
@@ -50,11 +72,24 @@ export function CacheProvider({ children }) {
         if (data && data.results !== undefined) {
           data = data.results;
         }
-        setCache((prev) => ({
-          ...prev,
-          [key]: { data, timestamp: Date.now() },
-        }));
-        return data;
+
+        // Compare structure with existing cache to keep references if unchanged
+        const existingEntry = cache[key];
+        if (existingEntry && JSON.stringify(existingEntry.data) === JSON.stringify(data)) {
+          // Data is identical: update the timestamp only, return same data reference
+          setCache((prev) => ({
+            ...prev,
+            [key]: { data: existingEntry.data, timestamp: Date.now() },
+          }));
+          return existingEntry.data;
+        } else {
+          // Data changed or no cache existed: update both
+          setCache((prev) => ({
+            ...prev,
+            [key]: { data, timestamp: Date.now() },
+          }));
+          return data;
+        }
       } finally {
         delete inFlightRequests.current[key];
       }
