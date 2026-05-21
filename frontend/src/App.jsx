@@ -21,19 +21,17 @@ import { ThemeProvider } from './components/ThemeContext';
 import { CacheProvider } from './components/CacheContext';
 
 function App() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
+  const [user, setUser] = useState(() => {
     const token = localStorage.getItem('access_token');
     if (token) {
       try {
-        const decoded = jwtDecode(token);
-        setUser(decoded);
+        return jwtDecode(token);
       } catch (e) {
         localStorage.removeItem('access_token');
       }
     }
-  }, []);
+    return null;
+  });
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
