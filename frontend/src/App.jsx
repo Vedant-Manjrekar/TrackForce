@@ -52,7 +52,7 @@ function App() {
               <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/dashboard" />} />
               
               <Route path="/dashboard" element={user ? <Dashboard user={user} /> : <Navigate to="/login" />} />
-              <Route path="/tasks" element={user ? <TaskList /> : <Navigate to="/login" />} />
+              <Route path="/tasks" element={user ? <TaskList user={user} /> : <Navigate to="/login" />} />
               <Route path="/tasks/:id" element={user ? <TaskDetail /> : <Navigate to="/login" />} />
               <Route path="/logs" element={user ? <Logs /> : <Navigate to="/login" />} />
               <Route path="/users" element={user ? <Users /> : <Navigate to="/login" />} />

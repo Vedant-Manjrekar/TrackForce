@@ -5,7 +5,7 @@ A full-stack system built with Django REST Framework and React for managing fiel
 ## Tech Stack
 - **Backend:** Django, Django REST Framework, SimpleJWT (Auth)
 - **Frontend:** React, Vite, Axios, Lucide React
-- **Database:** SQLite (default)
+- **Database:** PostgreSQL
 
 ## Features
 - **RBAC (Role Based Access Control):** 5 Roles (Admin, Regional Manager, Team Lead, Field Agent, Auditor).
@@ -21,7 +21,17 @@ A full-stack system built with Django REST Framework and React for managing fiel
 
 ## Setup Instructions
 
-### Backend
+### Database Setup (PostgreSQL)
+Ensure you have a PostgreSQL server running. You can easily start a PostgreSQL instance using the provided Docker Compose file:
+1. In the root directory, run:
+   ```bash
+   docker-compose up -d
+   ```
+   This will spin up a PostgreSQL instance on port `5432` with user `fieldops_user`, database `fieldops_db`, and password `password123`.
+
+*Note: Environment variables can be configured via a `.env` file in the `backend` directory (see [backend/.env.example](file:///Users/vedantmanjrekar/Documents/SapioAnalyticsAssignmnet/backend/.env.example)).*
+
+### Backend Setup
 1. Navigate to the `backend` directory.
 2. Create and activate a virtual environment:
    ```bash
@@ -33,7 +43,7 @@ A full-stack system built with Django REST Framework and React for managing fiel
    pip install -r requirements.txt
    ```
    *(Note: Requirements are already installed in the provided environment)*
-4. Run migrations:
+4. Run migrations to initialize the PostgreSQL schema:
    ```bash
    python manage.py migrate
    ```

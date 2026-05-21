@@ -60,13 +60,22 @@ class TeamSerializer(serializers.ModelSerializer):
     def get_performance_stats(self, obj):
         from tasks.models import Task
         from visits.models import Visit
-        total_tasks = Task.objects.filter(team=obj).count()
-        completed_tasks = Task.objects.filter(team=obj, status='COMPLETED').count()
+        from django.db.models import Q
+        
+        tasks = Task.objects.filter(Q(team=obj) | Q(assigned_to__profile__team=obj)).distinct()
+        total_tasks = tasks.count()
+        completed_tasks = tasks.filter(status='COMPLETED').count()
+        
+        active_visits = Visit.objects.filter(
+            Q(task__team=obj) | Q(agent__profile__team=obj), 
+            status='STARTED'
+        ).distinct().count()
+
         return {
             'total_tasks': total_tasks,
             'completed_tasks': completed_tasks,
             'completion_rate': f"{(completed_tasks/total_tasks*100) if total_tasks > 0 else 0:.1f}%",
-            'active_visits': Visit.objects.filter(task__team=obj, status='STARTED').count()
+            'active_visits': active_visits
         }
 
 class UserSerializer(serializers.ModelSerializer):

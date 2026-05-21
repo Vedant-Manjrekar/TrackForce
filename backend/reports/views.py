@@ -5,6 +5,7 @@ from tasks.models import Task
 from visits.models import Visit
 from users.models import Region, Team, User
 from django.db.models import Count, Avg, F
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 from datetime import timedelta
 
@@ -25,8 +26,9 @@ class ReportSummaryView(APIView):
             tasks_qs = tasks_qs.filter(region=user.profile.region)
             visits_qs = visits_qs.filter(task__region=user.profile.region)
         elif role == 'TEAM_LEAD':
-            tasks_qs = tasks_qs.filter(team=user.profile.team)
-            visits_qs = visits_qs.filter(task__team=user.profile.team)
+            from django.db.models import Q
+            tasks_qs = tasks_qs.filter(Q(team=user.profile.team) | Q(assigned_to__profile__role__name='FIELD_AGENT')).distinct()
+            visits_qs = visits_qs.filter(Q(task__team=user.profile.team) | Q(agent__profile__role__name='FIELD_AGENT')).distinct()
         # Auditor and Admin see all
 
         # 1. Pending tasks by region (Includes PENDING, ASSIGNED, IN_PROGRESS)
@@ -47,7 +49,7 @@ class ReportSummaryView(APIView):
             })
         pending_tasks_by_region = list(pending_by_region_dict.values())
         
-        # 2. Average completion time per field agent (Calculated in Python for 100% SQLite & DB compatibility)
+        # 2. Average completion time per field agent (Calculated in Python for PostgreSQL compatibility)
         completed_visits = visits_qs.filter(status='COMPLETED').select_related('agent')
         agent_durations = {}
         for v in completed_visits:
@@ -95,8 +97,9 @@ class DashboardSummaryView(APIView):
             tasks = tasks.filter(region=user.profile.region)
             visits = visits.filter(task__region=user.profile.region)
         elif role == 'TEAM_LEAD':
-            tasks = tasks.filter(team=user.profile.team)
-            visits = visits.filter(task__team=user.profile.team)
+            from django.db.models import Q
+            tasks = tasks.filter(Q(team=user.profile.team) | Q(assigned_to__profile__role__name='FIELD_AGENT')).distinct()
+            visits = visits.filter(Q(task__team=user.profile.team) | Q(agent__profile__role__name='FIELD_AGENT')).distinct()
         elif role == 'FIELD_AGENT':
             tasks = tasks.filter(assigned_to=user)
             visits = visits.filter(agent=user)
@@ -106,11 +109,22 @@ class DashboardSummaryView(APIView):
         if role == 'FIELD_AGENT':
             recent_logs = recent_logs.filter(actor=user)
         elif role == 'TEAM_LEAD':
-            recent_logs = recent_logs.filter(actor__profile__team=user.profile.team)
+            from django.db.models import Q
+            recent_logs = recent_logs.filter(Q(actor__profile__team=user.profile.team) | Q(actor__profile__role__name='FIELD_AGENT')).distinct()
         elif role == 'REGIONAL_MANAGER':
             recent_logs = recent_logs.filter(actor__profile__region=user.profile.region)
 
+        leader_profile = {
+            'username': user.username,
+            'email': user.email,
+            'role': role.replace('_', ' '),
+            'region': user.profile.region.name if hasattr(user, 'profile') and user.profile.region else 'Unassigned Region',
+            'team': user.profile.team.name if hasattr(user, 'profile') and user.profile.team else 'Unassigned Team',
+            'employee_id': user.profile.employee_id if hasattr(user, 'profile') else f"EMP-{user.id}"
+        }
+
         return Response({
+            'leader_profile': leader_profile,
             'total_tasks': tasks.count(),
             'pending_tasks': tasks.filter(status__in=['PENDING', 'ASSIGNED', 'IN_PROGRESS']).count(),
             'completed_tasks': tasks.filter(status='COMPLETED').count(),
@@ -126,7 +140,7 @@ class DashboardSummaryView(APIView):
             'task_distribution': list(tasks.values('status').annotate(count=Count('id'))),
             'region_performance': list(tasks.values('region__name').annotate(count=Count('id'))),
             'visits_per_day': list(visits.filter(start_time__gte=timezone.now()-timedelta(days=7))
-                                 .extra(select={'day': "date(start_time)"})
+                                 .annotate(day=TruncDate('start_time'))
                                  .values('day')
                                  .annotate(count=Count('id'))
                                  .order_by('day'))

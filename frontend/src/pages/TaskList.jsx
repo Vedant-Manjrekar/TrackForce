@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
-import { ListTodo, Search, Flag, Calendar, User as UserIcon, MapPin, Plus, ArrowRight, CheckCircle2, Clock } from 'lucide-react';
+import { ListTodo, Search, Flag, Calendar, User as UserIcon, MapPin, Plus, ArrowRight, CheckCircle2, Clock, Trash2 } from 'lucide-react';
 
-function TaskList() {
+function TaskList({ user }) {
   const [tasks, setTasks] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [users, setUsers] = useState([]);
@@ -72,6 +72,19 @@ function TaskList() {
     }
   };
 
+  const handleDeleteTask = async (id) => {
+    if (window.confirm("Are you sure you want to delete this task?")) {
+      try {
+        await api.delete(`/tasks/${id}/`);
+        const response = await api.get('/tasks/');
+        setTasks(response.data.results || response.data);
+      } catch (err) {
+        console.error("Failed to delete task", err);
+        alert("Failed to delete task: " + (err.response?.data?.detail || err.message));
+      }
+    }
+  };
+
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = 
       task.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -98,9 +111,11 @@ function TaskList() {
           </div>
           <h1 style={{ fontSize: '2rem', margin: 0, fontWeight: '800', letterSpacing: '-0.03em' }}>Active Tasks</h1>
         </div>
-        <button onClick={() => setShowModal(true)} style={{ padding: '12px 24px', fontSize: '14px' }}>
-          <Plus size={18} /> Create New Task
-        </button>
+        {user?.role !== 'FIELD_AGENT' && (
+          <button onClick={() => setShowModal(true)} style={{ padding: '12px 24px', fontSize: '14px' }}>
+            <Plus size={18} /> Create New Task
+          </button>
+        )}
       </header>
 
       {/* Filter Bar */}
@@ -203,11 +218,24 @@ function TaskList() {
                     </div>
                   </td>
                   <td style={{ padding: '16px 24px', textAlign: 'right' }}>
-                    <Link to={`/tasks/${task.id}`}>
-                      <button className="btn-outline" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                        View <ArrowRight size={14} />
-                      </button>
-                    </Link>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                      <Link to={`/tasks/${task.id}`}>
+                        <button className="btn-outline" style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          View <ArrowRight size={14} />
+                        </button>
+                      </Link>
+                      {user?.role !== 'FIELD_AGENT' && (
+                        <button 
+                          onClick={() => handleDeleteTask(task.id)}
+                          style={{ padding: '8px 12px', fontSize: '13px', background: 'var(--border-color)', border: '1px solid var(--border-color)', color: 'var(--danger-color)', display: 'inline-flex', alignItems: 'center', gap: '6px', borderRadius: '6px', cursor: 'pointer' }}
+                          title="Delete Task"
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; e.currentTarget.style.borderColor = 'var(--danger-color)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'var(--border-color)'; e.currentTarget.style.borderColor = 'var(--border-color)'; }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
@@ -280,7 +308,31 @@ function TaskList() {
 
               <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' }}>Assign To</label>
-                <select value={formData.assigned_to} onChange={e => setFormData({...formData, assigned_to: e.target.value})}>
+                <select value={formData.assigned_to} onChange={e => {
+                  const selectedUserId = e.target.value;
+                  const selectedUser = users.find(u => u.id.toString() === selectedUserId.toString());
+                  let autoTeamId = formData.team;
+                  let autoRegionId = formData.region;
+
+                  if (selectedUser) {
+                    if (selectedUser.team_id) {
+                      autoTeamId = selectedUser.team_id;
+                    }
+                    if (selectedUser.region) {
+                      const matchedRegion = regions.find(r => r.name.toLowerCase() === selectedUser.region.toLowerCase());
+                      if (matchedRegion) {
+                        autoRegionId = matchedRegion.id;
+                      }
+                    }
+                  }
+
+                  setFormData({
+                    ...formData, 
+                    assigned_to: selectedUserId,
+                    team: autoTeamId,
+                    region: autoRegionId
+                  });
+                }}>
                   <option value="">-- Unassigned --</option>
                   {users.map(u => <option key={u.id} value={u.id}>{u.username} ({u.role})</option>)}
                 </select>

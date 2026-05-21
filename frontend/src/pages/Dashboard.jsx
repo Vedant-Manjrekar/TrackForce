@@ -15,7 +15,11 @@ import {
   Eye,
   Calendar,
   TrendingUp,
-  ArrowUpRight
+  ArrowUpRight,
+  MapPin,
+  Briefcase,
+  Shield,
+  Mail
 } from 'lucide-react';
 
 function Dashboard({ user }) {
@@ -46,7 +50,7 @@ function Dashboard({ user }) {
 
   return (
     <div>
-      <header style={{ marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <header style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
             <span className="status-badge status-assigned">Live Telemetry</span>
@@ -73,6 +77,60 @@ function Dashboard({ user }) {
           </div>
         )}
       </header>
+
+      {/* Executive Profile Banner */}
+      {stats?.leader_profile && (
+        <div className="card" style={{ padding: '28px 32px', marginBottom: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '24px', background: 'linear-gradient(135deg, var(--surface-color) 0%, var(--surface-subtle) 100%)', borderLeft: '4px solid var(--primary-color)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--primary-color)20', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-color)', fontSize: '24px', fontWeight: 'bold', border: '2px solid var(--surface-hover)' }}>
+              {stats.leader_profile.username[0].toUpperCase()}
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <h2 style={{ margin: 0, fontSize: '1.6rem', fontWeight: '800', color: 'var(--text-primary)' }}>{stats.leader_profile.username}</h2>
+                <span className="status-badge status-assigned" style={{ fontSize: '11px', padding: '3px 10px', textTransform: 'uppercase' }}>
+                  {stats.leader_profile.role}
+                </span>
+              </div>
+              <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Mail size={14} style={{ color: 'var(--text-tertiary)' }} /> {stats.leader_profile.email}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '32px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-sm)', background: 'var(--surface-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary-color)', boxShadow: 'var(--shadow-sm)' }}>
+                <MapPin size={18} />
+              </div>
+              <div>
+                <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '600' }}>Operating Location</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>{stats.leader_profile.region}</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-sm)', background: 'var(--surface-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--warning-color)', boxShadow: 'var(--shadow-sm)' }}>
+                <Briefcase size={18} />
+              </div>
+              <div>
+                <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '600' }}>Position & Unit</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>{stats.leader_profile.team}</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-sm)', background: 'var(--surface-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--success-color)', boxShadow: 'var(--shadow-sm)' }}>
+                <Shield size={18} />
+              </div>
+              <div>
+                <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '600' }}>Security Clearance</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>{stats.leader_profile.employee_id}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Corporate KPI Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '40px' }}>
