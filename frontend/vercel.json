@@ -2,10 +2,6 @@
   "trailingSlash": true,
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://trackforce-ehev.onrender.com/api/:path*"
-    },
-    {
       "source": "/(.*)",
       "destination": "/"
     }
