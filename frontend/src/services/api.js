@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://trackforce-ehev.onrender.com/api/';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: baseUrl,
 });
 
 api.interceptors.request.use((config) => {
@@ -21,7 +23,8 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refresh_token');
       if (refreshToken) {
         try {
-          const response = await axios.post('/api/auth/refresh/', { refresh: refreshToken });
+          const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+          const response = await axios.post(`${cleanBaseUrl}/auth/refresh/`, { refresh: refreshToken });
           localStorage.setItem('access_token', response.data.access);
           api.defaults.headers.common['Authorization'] = `Bearer ${response.data.access}`;
           return api(originalRequest);

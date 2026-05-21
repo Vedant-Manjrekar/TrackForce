@@ -204,4 +204,10 @@ SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=0, cast=int)
 SECURE_HSTS_INCLUDE_SUBDOMAINS = config('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=False, cast=bool)
 SECURE_HSTS_PRELOAD = config('SECURE_HSTS_PRELOAD', default=False, cast=bool)
 SECURE_CONTENT_TYPE_NOSNIFF = config('SECURE_CONTENT_TYPE_NOSNIFF', default=True, cast=bool)
+SECURE_BROWSER_XSS_FILTER = config('SECURE_BROWSER_XSS_FILTER', default=True, cast=bool)
+X_FRAME_OPTIONS = config('X_FRAME_OPTIONS', default='DENY')
+
+# CSRF Trusted Origins for CORS communication
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='http://localhost:3000', cast=Csv())
+
 
