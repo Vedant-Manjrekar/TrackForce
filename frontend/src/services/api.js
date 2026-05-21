@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://trackforce-ehev.onrender.com/api/';
+const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api/';
 
 const api = axios.create({
   baseURL: baseUrl,
