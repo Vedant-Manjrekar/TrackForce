@@ -32,7 +32,7 @@ function Sidebar({ onLogout, user }) {
     menuItems.push(
       { name: 'Tasks', path: '/tasks', icon: <ListTodo size={20} strokeWidth={1.75} /> },
       { name: 'Users', path: '/users', icon: <UserIcon size={20} strokeWidth={1.75} /> },
-      { name: 'Visits', path: '/visits', icon: <MapPin size={20} stroke="var(--text-secondary)" strokeWidth={1.75} /> },
+      { name: 'Visits', path: '/visits', icon: <MapPin size={20} strokeWidth={1.75} /> },
       { name: 'Reports', path: '/reports', icon: <BarChart3 size={20} strokeWidth={1.75} /> },
       { name: 'Activity Logs', path: '/logs', icon: <ClipboardList size={20} strokeWidth={1.75} /> },
       { name: 'Regions', path: '/regions', icon: <MapIcon size={20} strokeWidth={1.75} /> },
@@ -125,7 +125,9 @@ function Sidebar({ onLogout, user }) {
         {/* Navigation Links */}
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto', flex: 1, paddingRight: isCollapsed ? '0' : '4px', marginBottom: '20px' }}>
           {menuItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const currentPath = location.pathname.replace(/\/+$/, '') || '/';
+            const itemPath = item.path.replace(/\/+$/, '') || '/';
+            const isActive = currentPath === itemPath || (itemPath !== '/dashboard' && currentPath.startsWith(itemPath + '/'));
             return (
               <Link 
                 key={item.path} 
