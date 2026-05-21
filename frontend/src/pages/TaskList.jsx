@@ -3,16 +3,20 @@ import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { ListTodo, Search, Flag, Calendar, User as UserIcon, MapPin, Plus, ArrowRight, CheckCircle2, Clock, Trash2 } from 'lucide-react';
 
+import { useCache } from '../components/CacheContext';
+import Loader from '../components/Loader';
+
 function TaskList({ user }) {
-  const [tasks, setTasks] = useState([]);
+  const { getCachedData, fetchWithCache } = useCache();
+  const [tasks, setTasks] = useState(getCachedData('tasks') || []);
   const [showModal, setShowModal] = useState(false);
-  const [users, setUsers] = useState([]);
-  const [regions, setRegions] = useState([]);
-  const [teams, setTeams] = useState([]);
+  const [users, setUsers] = useState(getCachedData('users') || []);
+  const [regions, setRegions] = useState(getCachedData('regions') || []);
+  const [teams, setTeams] = useState(getCachedData('teams') || []);
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(tasks.length === 0);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -27,8 +31,8 @@ function TaskList({ user }) {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await api.get('/tasks/');
-        setTasks(response.data.results || response.data);
+        const data = await fetchWithCache('tasks', () => api.get('/tasks/'));
+        setTasks(data);
       } catch (err) {
         console.error("Failed to fetch tasks", err);
       }
@@ -36,21 +40,22 @@ function TaskList({ user }) {
     
     const fetchOptions = async () => {
       try {
-        const [usersRes, regionsRes, teamsRes] = await Promise.all([
-          api.get('/users/').catch(() => ({ data: { results: [] } })),
-          api.get('/regions/').catch(() => ({ data: { results: [] } })),
-          api.get('/teams/').catch(() => ({ data: { results: [] } }))
+        const [usersData, regionsData, teamsData] = await Promise.all([
+          fetchWithCache('users', () => api.get('/users/').catch(() => [])),
+          fetchWithCache('regions', () => api.get('/regions/').catch(() => [])),
+          fetchWithCache('teams', () => api.get('/teams/').catch(() => []))
         ]);
-        setUsers(usersRes.data.results || usersRes.data || []);
-        setRegions(regionsRes.data.results || regionsRes.data || []);
-        setTeams(teamsRes.data.results || teamsRes.data || []);
+        
+        setUsers(usersData);
+        setRegions(regionsData);
+        setTeams(teamsData);
       } catch (err) {
         console.error("Failed to fetch options", err);
       }
     };
 
     Promise.all([fetchTasks(), fetchOptions()]).then(() => setLoading(false));
-  }, []);
+  }, [fetchWithCache]);
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
@@ -65,7 +70,9 @@ function TaskList({ user }) {
       setFormData({ title: '', description: '', priority: 'LOW', due_date: '', assigned_to: '', region: '', team: '' });
       
       const response = await api.get('/tasks/');
-      setTasks(response.data.results || response.data);
+      const data = response.data.results || response.data;
+      setTasks(data);
+      setCachedData('tasks', data);
     } catch (err) {
       console.error("Failed to create task", err);
       alert("Failed to create task: " + JSON.stringify(err.response?.data || err.message));
@@ -77,7 +84,9 @@ function TaskList({ user }) {
       try {
         await api.delete(`/tasks/${id}/`);
         const response = await api.get('/tasks/');
-        setTasks(response.data.results || response.data);
+        const data = response.data.results || response.data;
+        setTasks(data);
+        setCachedData('tasks', data);
       } catch (err) {
         console.error("Failed to delete task", err);
         alert("Failed to delete task: " + (err.response?.data?.detail || err.message));
@@ -98,7 +107,7 @@ function TaskList({ user }) {
     return matchesSearch && matchesPriority && matchesStatus;
   });
 
-  if (loading) return <div style={{ padding: '40px', color: 'var(--text-secondary)', fontSize: '15px' }}>Loading tasks...</div>;
+  if (loading) return <Loader message="Loading tasks..." />;
 
   return (
     <div>

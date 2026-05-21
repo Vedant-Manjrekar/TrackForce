@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
 import { MessageSquare, Bot, AlertCircle, Calendar, User as UserIcon, MapPin, Flag, PlayCircle, CheckCircle2, Clock, ArrowLeft, ShieldAlert } from 'lucide-react';
+import Loader from '../components/Loader';
 
 function TaskDetail() {
   const { id } = useParams();
@@ -53,7 +54,7 @@ function TaskDetail() {
     }
   };
 
-  if (!task) return <div style={{ padding: '40px', color: 'var(--text-secondary)', fontSize: '15px' }}>Loading task details...</div>;
+  if (!task) return <Loader message="Loading task details..." />;
 
   const activeVisit = visits.find(v => v.status === 'STARTED');
   

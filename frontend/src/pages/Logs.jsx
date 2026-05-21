@@ -1,20 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import api from '../services/api';
+import { useCache } from '../components/CacheContext';
+import Loader from '../components/Loader';
 
 function Logs() {
-  const [logs, setLogs] = useState([]);
+  const { getCachedData, fetchWithCache } = useCache();
+  const cachedLogs = getCachedData('logs') || [];
+
+  const [logs, setLogs] = useState(cachedLogs);
+  const [loading, setLoading] = useState(cachedLogs.length === 0);
+
+  const fetchLogs = useCallback(async () => {
+    try {
+      const data = await fetchWithCache('logs', () => api.get('/logs/'));
+      setLogs(data);
+    } catch (err) {
+      console.error("Failed to fetch logs", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchWithCache]);
 
   useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const response = await api.get('/logs/');
-        setLogs(response.data.results);
-      } catch (err) {
-        console.error("Failed to fetch logs", err);
-      }
-    };
     fetchLogs();
-  }, []);
+  }, [fetchLogs]);
+
+  if (loading) return <Loader message="Connecting to telemetry stream..." />;
 
   return (
     <div>

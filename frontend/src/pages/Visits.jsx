@@ -1,30 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import api from '../services/api';
 import { Eye, Brain, MapPin, CheckCircle, Clock, AlertTriangle, X, Search, ShieldAlert, User as UserIcon } from 'lucide-react';
+import { useCache } from '../components/CacheContext';
+import Loader from '../components/Loader';
 
 function Visits() {
-  const [visits, setVisits] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { getCachedData, fetchWithCache } = useCache();
+  const cachedVisits = getCachedData('visits') || [];
+  
+  const [visits, setVisits] = useState(cachedVisits);
+  const [loading, setLoading] = useState(cachedVisits.length === 0);
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [riskFilter, setRiskFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
-  const fetchVisits = async () => {
+  const fetchVisits = useCallback(async () => {
     try {
-      const response = await api.get('/visits/');
-      setVisits(response.data.results || response.data);
+      const data = await fetchWithCache('visits', () => api.get('/visits/'));
+      setVisits(data);
     } catch (err) {
       console.error("Failed to fetch visits", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchWithCache]);
 
   useEffect(() => {
     fetchVisits();
-  }, []);
+  }, [fetchVisits]);
 
   const handleOpenVisit = (visit) => {
     setSelectedVisit(visit);
@@ -42,7 +47,7 @@ function Visits() {
     return matchesSearch && matchesRisk && matchesStatus;
   });
 
-  if (loading) return <div style={{ padding: '40px', color: 'var(--text-secondary)', fontSize: '15px' }}>Loading visits...</div>;
+  if (loading) return <Loader message="Synchronizing visit logs..." />;
 
   return (
     <div>

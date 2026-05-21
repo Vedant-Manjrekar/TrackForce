@@ -7,17 +7,22 @@ import {
   RefreshCw,
   AlertTriangle
 } from 'lucide-react';
+import { useCache } from '../components/CacheContext';
+import Loader from '../components/Loader';
 
 function Settings() {
+  const { getCachedData, fetchWithCache } = useCache();
+  const cachedProfile = getCachedData('users_me') || null;
+
   const [activeTab, setActiveTab] = useState('Profile');
-  const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState(cachedProfile);
+  const [loading, setLoading] = useState(!cachedProfile);
   const [saving, setSaving] = useState(false);
-  const [userProfile, setUserProfile] = useState(null);
   
   const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
+    first_name: cachedProfile?.first_name || '',
+    last_name: cachedProfile?.last_name || '',
+    email: cachedProfile?.email || '',
     new_password: '',
     confirm_password: ''
   });
@@ -25,14 +30,14 @@ function Settings() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await api.get('/users/me/');
-        setUserProfile(response.data);
-        setFormData({
-          ...formData,
-          first_name: response.data.first_name || '',
-          last_name: response.data.last_name || '',
-          email: response.data.email || ''
-        });
+        const data = await fetchWithCache('users_me', () => api.get('/users/me/'));
+        setUserProfile(data);
+        setFormData(prev => ({
+          ...prev,
+          first_name: data.first_name || '',
+          last_name: data.last_name || '',
+          email: data.email || ''
+        }));
       } catch (err) {
         console.error("Failed to fetch profile", err);
       } finally {
@@ -40,17 +45,19 @@ function Settings() {
       }
     };
     fetchProfile();
-  }, []);
+  }, [fetchWithCache]);
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.patch('/users/me/', {
+      const response = await api.patch('/users/me/', {
         first_name: formData.first_name,
         last_name: formData.last_name,
         email: formData.email
       });
+      setUserProfile(response.data);
+      setCachedData('users_me', response.data);
       alert("Profile updated successfully!");
     } catch (err) {
       alert("Error updating profile");
@@ -82,7 +89,7 @@ function Settings() {
     { id: 'Password', icon: <Lock size={18} />, label: 'Security & Password' },
   ];
 
-  if (loading) return <div className="p-4 text-gray-400">Initializing settings console...</div>;
+  if (loading) return <Loader message="Accessing global configuration..." />;
 
   return (
     <div>

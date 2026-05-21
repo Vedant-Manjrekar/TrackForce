@@ -2,10 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { Users as UsersIcon, MapPin, CheckCircle2, Clock, Activity, Target, X, Flag, Calendar, ArrowRight, ListTodo } from 'lucide-react';
+import { useCache } from '../components/CacheContext';
+import Loader from '../components/Loader';
 
 function MyTeam() {
-  const [agents, setAgents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { getCachedData, fetchWithCache } = useCache();
+  const cachedUsers = getCachedData('users') || [];
+  const initialAgents = cachedUsers.filter(u => u.role === 'FIELD_AGENT');
+  
+  const [agents, setAgents] = useState(initialAgents);
+  const [loading, setLoading] = useState(initialAgents.length === 0);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [agentTasks, setAgentTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(false);
@@ -13,9 +19,8 @@ function MyTeam() {
   useEffect(() => {
     const fetchAgents = async () => {
       try {
-        const response = await api.get('/users/');
-        // Backend scopes results based on TL's team
-        const teamAgents = (response.data.results || response.data).filter(u => u.role === 'FIELD_AGENT');
+        const data = await fetchWithCache('users', () => api.get('/users/'));
+        const teamAgents = data.filter(u => u.role === 'FIELD_AGENT');
         setAgents(teamAgents);
       } catch (err) {
         console.error("Failed to fetch team agents", err);
@@ -24,7 +29,7 @@ function MyTeam() {
       }
     };
     fetchAgents();
-  }, []);
+  }, [fetchWithCache]);
 
   const handleSelectAgent = async (agent) => {
     setSelectedAgent(agent);
@@ -39,7 +44,7 @@ function MyTeam() {
     }
   };
 
-  if (loading) return <div className="p-4">Calibrating team performance metrics...</div>;
+  if (loading) return <Loader message="Calibrating team performance metrics..." />;
 
   return (
     <div>
@@ -222,9 +227,7 @@ function MyTeam() {
               </div>
 
               {loadingTasks ? (
-                <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '14px' }}>
-                  Fetching assigned tasks...
-                </div>
+                <Loader message="Fetching assigned tasks..." />
               ) : agentTasks.length > 0 ? (
                 <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>

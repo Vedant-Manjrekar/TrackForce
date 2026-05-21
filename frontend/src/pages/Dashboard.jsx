@@ -22,15 +22,19 @@ import {
   Mail
 } from 'lucide-react';
 
+import { useCache } from '../components/CacheContext';
+import Loader from '../components/Loader';
+
 function Dashboard({ user }) {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { getCachedData, fetchWithCache } = useCache();
+  const [stats, setStats] = useState(getCachedData('dashboard_stats') || null);
+  const [loading, setLoading] = useState(!stats);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await api.get('/dashboard/summary/');
-        setStats(response.data);
+        const data = await fetchWithCache('dashboard_stats', () => api.get('/dashboard/summary/'));
+        setStats(data);
       } catch (err) {
         console.error("Failed to fetch dashboard stats", err);
       } finally {
@@ -38,13 +42,9 @@ function Dashboard({ user }) {
       }
     };
     fetchStats();
-  }, []);
+  }, [fetchWithCache]);
 
-  if (loading) return (
-    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontSize: '16px' }}>
-      Connecting to telemetry stream...
-    </div>
-  );
+  if (loading) return <Loader message="Connecting to telemetry stream..." />;
 
   const isAgent = user?.role === 'FIELD_AGENT';
 

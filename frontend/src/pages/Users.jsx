@@ -1,12 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import api from '../services/api';
 import { UserPlus, Edit2, CheckCircle, XCircle, Key, Search, ShieldCheck, UserCheck, ShieldAlert, Users as UsersIcon } from 'lucide-react';
+import { useCache } from '../components/CacheContext';
+import Loader from '../components/Loader';
 
 function Users() {
-  const [users, setUsers] = useState([]);
-  const [regions, setRegions] = useState([]);
-  const [teams, setTeams] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { getCachedData, fetchWithCache } = useCache();
+  const cachedUsers = getCachedData('users') || [];
+  const cachedRegions = getCachedData('regions') || [];
+  const cachedTeams = getCachedData('teams') || [];
+
+  const [users, setUsers] = useState(cachedUsers);
+  const [regions, setRegions] = useState(cachedRegions);
+  const [teams, setTeams] = useState(cachedTeams);
+  const [loading, setLoading] = useState(cachedUsers.length === 0);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('create'); // 'create', 'edit', 'password'
   const [selectedUser, setSelectedUser] = useState(null);
@@ -24,31 +31,31 @@ function Users() {
     is_active: true
   });
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
-      const response = await api.get('/users/');
-      setUsers(response.data.results || response.data);
+      const data = await fetchWithCache('users', () => api.get('/users/'));
+      setUsers(data);
     } catch (err) {
       console.error("Failed to fetch users", err);
     }
-  };
+  }, [fetchWithCache]);
 
-  const fetchOptions = async () => {
+  const fetchOptions = useCallback(async () => {
     try {
-      const [regionsRes, teamsRes] = await Promise.all([
-        api.get('/regions/'),
-        api.get('/teams/')
+      const [regionsData, teamsData] = await Promise.all([
+        fetchWithCache('regions', () => api.get('/regions/')),
+        fetchWithCache('teams', () => api.get('/teams/'))
       ]);
-      setRegions(regionsRes.data.results || regionsRes.data);
-      setTeams(teamsRes.data.results || teamsRes.data);
+      setRegions(regionsData);
+      setTeams(teamsData);
     } catch (err) {
       console.error("Failed to fetch regions/teams", err);
     }
-  };
+  }, [fetchWithCache]);
 
   useEffect(() => {
     Promise.all([fetchUsers(), fetchOptions()]).then(() => setLoading(false));
-  }, []);
+  }, [fetchUsers, fetchOptions]);
 
   const handleOpenModal = (type, user = null) => {
     setModalType(type);
@@ -118,7 +125,7 @@ function Users() {
     return matchesSearch && matchesRole;
   });
 
-  if (loading) return <div style={{ padding: '40px', color: 'var(--text-secondary)', fontSize: '15px' }}>Loading users...</div>;
+  if (loading) return <Loader message="Loading user directory..." />;
 
   return (
     <div>

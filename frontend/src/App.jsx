@@ -18,6 +18,7 @@ import Sidebar from './components/Sidebar';
 import { jwtDecode } from 'jwt-decode';
 
 import { ThemeProvider } from './components/ThemeContext';
+import { CacheProvider } from './components/CacheContext';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -38,13 +39,16 @@ function App() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     setUser(null);
+    // Force reload to completely wipe React state cache
+    window.location.href = '/';
   };
 
   return (
     <ThemeProvider>
-      <Router>
-        <div className="layout">
-          {user && <Sidebar onLogout={handleLogout} user={user} />}
+      <CacheProvider>
+        <Router>
+          <div className="layout">
+            {user && <Sidebar onLogout={handleLogout} user={user} />}
           <main className={user ? "main-content" : "landing-main"}>
             <Routes>
               <Route path="/" element={!user ? <Landing /> : <Navigate to="/dashboard" />} />
@@ -66,6 +70,7 @@ function App() {
           </main>
         </div>
       </Router>
+      </CacheProvider>
     </ThemeProvider>
   );
 }

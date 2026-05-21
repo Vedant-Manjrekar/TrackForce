@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import { BarChart3, PieChart, TrendingUp, Users, Map, CheckCircle2, ChevronDown, ChevronUp, Calendar, AlertCircle, Clock, User } from 'lucide-react';
+import { useCache } from '../components/CacheContext';
+import Loader from '../components/Loader';
 
 function Reports() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { getCachedData, fetchWithCache } = useCache();
+  const cachedData = getCachedData('reports_summary') || null;
+
+  const [data, setData] = useState(cachedData);
+  const [loading, setLoading] = useState(!cachedData);
   const [expandedRegions, setExpandedRegions] = useState({});
 
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const response = await api.get('/reports/summary/');
-        setData(response.data);
+        const result = await fetchWithCache('reports_summary', () => api.get('/reports/summary/'));
+        setData(result);
         // By default, keep the dropdowns closed
         setExpandedRegions({});
       } catch (err) {
@@ -21,7 +26,7 @@ function Reports() {
       }
     };
     fetchReports();
-  }, []);
+  }, [fetchWithCache]);
 
   const toggleRegion = (regionName) => {
     setExpandedRegions(prev => ({
@@ -39,7 +44,7 @@ function Reports() {
     }
   };
 
-  if (loading) return <div style={{ padding: '40px', color: 'var(--text-secondary)', fontSize: '15px' }}>Generating operational intelligence...</div>;
+  if (loading) return <Loader message="Generating operational intelligence..." />;
 
   return (
     <div>

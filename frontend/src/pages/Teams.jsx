@@ -1,12 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import api from '../services/api';
 import { Users as UsersIcon, Plus, Trash2, Edit2, X, MapPin, UserCheck, TrendingUp, ChevronRight, Search, Filter, Activity, Award, CheckCircle2 } from 'lucide-react';
+import { useCache } from '../components/CacheContext';
+import Loader from '../components/Loader';
 
 function Teams() {
-  const [teams, setTeams] = useState([]);
-  const [regions, setRegions] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { getCachedData, fetchWithCache } = useCache();
+  const cachedTeams = getCachedData('teams') || [];
+  const cachedRegions = getCachedData('regions') || [];
+  const cachedUsers = getCachedData('users') || [];
+
+  const [teams, setTeams] = useState(cachedTeams);
+  const [regions, setRegions] = useState(cachedRegions);
+  const [allUsers, setAllUsers] = useState(cachedUsers);
+  const [loading, setLoading] = useState(cachedTeams.length === 0);
   
   const [showModal, setShowModal] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
@@ -17,26 +24,27 @@ function Teams() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('ALL');
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      const [teamsRes, regionsRes, usersRes] = await Promise.all([
-        api.get('/teams/'),
-        api.get('/regions/'),
-        api.get('/users/')
+      const [teamsData, regionsData, usersData] = await Promise.all([
+        fetchWithCache('teams', () => api.get('/teams/')),
+        fetchWithCache('regions', () => api.get('/regions/')),
+        fetchWithCache('users', () => api.get('/users/'))
       ]);
-      setTeams(teamsRes.data.results || teamsRes.data);
-      setRegions(regionsRes.data.results || regionsRes.data);
-      setAllUsers(usersRes.data.results || usersRes.data);
+      
+      setTeams(teamsData);
+      setRegions(regionsData);
+      setAllUsers(usersData);
     } catch (err) {
       console.error("Failed to fetch data", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchWithCache]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const handleOpenModal = (team = null) => {
     setCurrentTeam(team);
@@ -117,7 +125,7 @@ function Teams() {
   const avgCompletion = teams.length > 0 ? 
     (teams.reduce((acc, team) => acc + parseFloat(team.performance_stats?.completion_rate || '0'), 0) / teams.length).toFixed(1) : 0;
 
-  if (loading) return <div className="p-4">Loading team environment...</div>;
+  if (loading) return <Loader message="Assembling team telemetry..." />;
 
   return (
     <div>

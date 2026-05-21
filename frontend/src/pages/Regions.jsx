@@ -1,29 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import api from '../services/api';
 import { MapPin, Plus, Trash2, Edit2, X, Users, ClipboardList, ShieldCheck, ChevronRight } from 'lucide-react';
+import { useCache } from '../components/CacheContext';
+import Loader from '../components/Loader';
 
 function Regions() {
-  const [regions, setRegions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { getCachedData, fetchWithCache } = useCache();
+  const cachedRegions = getCachedData('regions') || [];
+  
+  const [regions, setRegions] = useState(cachedRegions);
+  const [loading, setLoading] = useState(cachedRegions.length === 0);
   const [showModal, setShowModal] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [currentRegion, setCurrentRegion] = useState(null);
   const [regionName, setRegionName] = useState('');
 
-  const fetchRegions = async () => {
+  const fetchRegions = useCallback(async () => {
     try {
-      const response = await api.get('/regions/');
-      setRegions(response.data.results || response.data);
+      const data = await fetchWithCache('regions', () => api.get('/regions/'));
+      setRegions(data);
     } catch (err) {
       console.error("Failed to fetch regions", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchWithCache]);
 
   useEffect(() => {
     fetchRegions();
-  }, []);
+  }, [fetchRegions]);
 
   const handleOpenModal = (region = null) => {
     setCurrentRegion(region);
@@ -62,7 +67,7 @@ function Regions() {
     }
   };
 
-  if (loading) return <div className="p-4">Loading regions...</div>;
+  if (loading) return <Loader message="Loading regional jurisdictions..." />;
 
   return (
     <div>
