@@ -5,6 +5,7 @@ venv/
 .venv/
 *.db
 *.sqlite3
+staticfiles/
 
 # Node / React
 node_modules/
