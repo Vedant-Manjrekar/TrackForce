@@ -7,7 +7,7 @@ import { useCache } from '../components/CacheContext';
 import Loader from '../components/Loader';
 
 function TaskList({ user }) {
-  const { getCachedData, fetchWithCache } = useCache();
+  const { getCachedData, setCachedData, fetchWithCache } = useCache();
   const [tasks, setTasks] = useState(getCachedData('tasks') || []);
   const [showModal, setShowModal] = useState(false);
   const [users, setUsers] = useState(getCachedData('users') || []);

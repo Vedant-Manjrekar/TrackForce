@@ -93,13 +93,23 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': config(
-        'DATABASE_URL',
-        default='postgres://fieldops_user:password123@localhost:5432/fieldops_db',
-        cast=dj_database_url.parse
-    )
-}
+import sys
+
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'test_db.sqlite3',
+        }
+    }
+else:
+    DATABASES = {
+        'default': config(
+            'DATABASE_URL',
+            default='postgres://fieldops_user:password123@localhost:5432/fieldops_db',
+            cast=dj_database_url.parse
+        )
+    }
 
 
 # Password validation

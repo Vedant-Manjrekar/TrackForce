@@ -108,7 +108,10 @@ function Teams() {
   };
 
   const leadOptions = allUsers.filter(u => u.role === 'TEAM_LEAD' || u.role === 'ADMIN');
-  const agentOptions = allUsers.filter(u => u.role === 'FIELD_AGENT');
+  const agentOptions = allUsers.filter(u => {
+    if (u.role !== 'FIELD_AGENT') return false;
+    return !u.team || (currentTeam && u.team === currentTeam.name);
+  });
 
   // Filtered teams calculation
   const filteredTeams = teams.filter(team => {
@@ -240,10 +243,33 @@ function Teams() {
                 </select>
               </div>
               <div>
-                <label style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '6px', display: 'block' }}>Select Agents (Hold Ctrl/Cmd to select multiple)</label>
-                <select multiple value={formData.agent_ids} onChange={e => setFormData({...formData, agent_ids: Array.from(e.target.selectedOptions, o => o.value)})} style={{ width: '100%', height: '120px', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }}>
-                  {agentOptions.map(u => <option key={u.id} value={u.id}>{u.username}</option>)}
-                </select>
+                <label style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '6px', display: 'block' }}>Select Agents</label>
+                <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px', background: 'var(--bg-color)' }}>
+                  {agentOptions.length === 0 ? (
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '13px', fontStyle: 'italic', padding: '10px' }}>No available agents</div>
+                  ) : (
+                    agentOptions.map(u => (
+                      <label key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px', cursor: 'pointer', borderBottom: '1px solid var(--border-color)' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={formData.agent_ids.includes(u.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData(prev => ({ ...prev, agent_ids: [...prev.agent_ids, u.id] }));
+                            } else {
+                              setFormData(prev => ({ ...prev, agent_ids: prev.agent_ids.filter(id => id !== u.id) }));
+                            }
+                          }}
+                          style={{ width: '16px', height: '16px', accentColor: 'var(--success-color)', cursor: 'pointer' }}
+                        />
+                        <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                           <span style={{ color: 'var(--text-primary)', fontWeight: '500' }}>{u.username}</span>
+                           <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{u.team ? `Currently in ${u.team}` : 'Unassigned'}</span>
+                        </div>
+                      </label>
+                    ))
+                  )}
+                </div>
                 <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '5px' }}>Currently {formData.agent_ids.length} agents selected.</div>
               </div>
               <button type="submit" style={{ width: '100%', marginTop: '10px', background: 'var(--success-color)', color: 'var(--text-primary)', padding: '12px', borderRadius: '8px', fontWeight: '600', border: 'none', cursor: 'pointer' }}>{currentTeam ? 'Save Changes' : 'Create Team'}</button>

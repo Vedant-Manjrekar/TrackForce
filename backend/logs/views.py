@@ -13,9 +13,16 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
         if role == 'ADMIN' or role == 'AUDITOR':
             return ActivityLog.objects.all().order_by('-timestamp')
             
-        # For others, maybe they only see their own logs or logs related to their scope?
-        # Requirement says Auditor has access to reports and logs.
-        # Admin has full access.
-        # Let's restrict others to their own actions for now, or just follow the requirement.
-        
+        if role == 'TEAM_LEAD':
+            from django.db.models import Q
+            from users.models import Team
+            led_teams = Team.objects.filter(lead=user)
+            q = Q(actor__profile__team__in=led_teams) | Q(actor=user)
+            if user.profile.team:
+                q = q | Q(actor__profile__team=user.profile.team)
+            return ActivityLog.objects.filter(q).distinct().order_by('-timestamp')
+            
+        if role == 'REGIONAL_MANAGER':
+            return ActivityLog.objects.filter(actor__profile__region=user.profile.region).order_by('-timestamp')
+            
         return ActivityLog.objects.filter(actor=user).order_by('-timestamp')

@@ -75,6 +75,11 @@ def seed():
         )
         if p_created:
             print(f"Created profile for user: {username} with role {role_name}")
+            
+        if role_name == 'TEAM_LEAD' and team_name:
+            team = teams[team_name]
+            team.lead = user
+            team.save()
 
     # 5. Create Tasks
     tl_alpha = User.objects.get(username='tl_alpha')

@@ -39,7 +39,12 @@ class TaskViewSet(viewsets.ModelViewSet):
             return Task.objects.filter(region=user.profile.region)
             
         if role == 'TEAM_LEAD':
-            return Task.objects.filter(Q(team=user.profile.team) | Q(assigned_to__profile__role__name='FIELD_AGENT')).distinct()
+            if user.profile.team:
+                return Task.objects.filter(
+                    Q(team=user.profile.team) |
+                    Q(assigned_to__profile__team=user.profile.team)
+                ).distinct()
+            return Task.objects.none()
             
         if role == 'FIELD_AGENT':
             return Task.objects.filter(assigned_to=user)

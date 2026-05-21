@@ -9,6 +9,29 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     pagination_class = None
 
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated or not hasattr(user, 'profile'):
+            return User.objects.none()
+            
+        role = user.profile.role.name
+        
+        if role == 'ADMIN' or role == 'AUDITOR':
+            return User.objects.all().order_by('-id')
+            
+        if role == 'REGIONAL_MANAGER':
+            return User.objects.filter(profile__region=user.profile.region).order_by('-id')
+            
+        if role == 'TEAM_LEAD':
+            if user.profile.team:
+                return User.objects.filter(profile__team=user.profile.team).order_by('-id')
+            return User.objects.filter(id=user.id).order_by('-id')
+            
+        if role == 'FIELD_AGENT':
+            return User.objects.filter(id=user.id)
+            
+        return User.objects.none()
+
     def get_permissions(self):
         if self.action == 'register':
             return [drf_permissions.AllowAny()]
@@ -63,8 +86,50 @@ class RegionViewSet(viewsets.ModelViewSet):
     permission_classes = [drf_permissions.AllowAny]
     pagination_class = None
 
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated or not hasattr(user, 'profile'):
+            return Region.objects.all().order_by('-id')
+            
+        role = user.profile.role.name
+        
+        if role == 'ADMIN' or role == 'AUDITOR':
+            return Region.objects.all().order_by('-id')
+            
+        if role in ['REGIONAL_MANAGER', 'TEAM_LEAD', 'FIELD_AGENT']:
+            if user.profile.region:
+                return Region.objects.filter(id=user.profile.region.id).order_by('-id')
+            return Region.objects.none()
+            
+        return Region.objects.none()
+
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all().order_by('-id')
     serializer_class = TeamSerializer
     permission_classes = [drf_permissions.AllowAny]
     pagination_class = None
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated or not hasattr(user, 'profile'):
+            return Team.objects.all().order_by('-id')
+            
+        role = user.profile.role.name
+        
+        if role == 'ADMIN' or role == 'AUDITOR':
+            return Team.objects.all().order_by('-id')
+            
+        if role == 'REGIONAL_MANAGER':
+            return Team.objects.filter(region=user.profile.region).order_by('-id')
+            
+        if role == 'TEAM_LEAD':
+            if user.profile.team:
+                return Team.objects.filter(id=user.profile.team.id).order_by('-id')
+            return Team.objects.none()
+            
+        if role == 'FIELD_AGENT':
+            if user.profile.team:
+                return Team.objects.filter(id=user.profile.team.id).order_by('-id')
+            return Team.objects.none()
+            
+        return Team.objects.none()

@@ -51,6 +51,8 @@ class TeamSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'region', 'region_name', 'lead_name', 'members', 'performance_stats']
 
     def get_lead_name(self, obj):
+        if obj.lead:
+            return obj.lead.username
         lead = User.objects.filter(profile__team=obj, profile__role__name='TEAM_LEAD').first()
         return lead.username if lead else "Unassigned"
 
@@ -84,6 +86,8 @@ class UserSerializer(serializers.ModelSerializer):
     team = serializers.CharField(source='profile.team.name', read_only=True, allow_null=True)
     team_id = serializers.PrimaryKeyRelatedField(queryset=Team.objects.all(), source='profile.team', required=False, allow_null=True)
     stats = serializers.SerializerMethodField()
+    full_name = serializers.CharField(required=False)
+    team_lead_name = serializers.SerializerMethodField()
     
     # Write-only fields for updates
     role_name = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
@@ -91,7 +95,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'region', 'team', 'team_id', 'is_active', 'stats', 'role_name', 'region_id']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'full_name', 'team_lead_name', 'role', 'region', 'team', 'team_id', 'is_active', 'stats', 'role_name', 'region_id']
+        read_only_fields = ['username']
 
     def get_stats(self, obj):
         if not hasattr(obj, 'profile') or obj.profile.role.name != 'FIELD_AGENT':
@@ -107,9 +112,33 @@ class UserSerializer(serializers.ModelSerializer):
             'completion_rate': round((completed / total * 100), 1) if total > 0 else 0
         }
 
+    def get_team_lead_name(self, obj):
+        if hasattr(obj, 'profile') and obj.profile.team:
+            team = obj.profile.team
+            if team.lead:
+                lead = team.lead
+            else:
+                lead = User.objects.filter(profile__team=team, profile__role__name='TEAM_LEAD').first()
+            if lead:
+                name = f"{lead.first_name} {lead.last_name}".strip()
+                return name if name else lead.username
+        return None
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        name = f"{instance.first_name} {instance.last_name}".strip()
+        ret['full_name'] = name if name else instance.username
+        return ret
+
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('profile', {})
         role_name = validated_data.pop('role_name', None)
+        full_name = validated_data.pop('full_name', None)
+        
+        if full_name is not None:
+            name_parts = full_name.strip().split(' ', 1)
+            instance.first_name = name_parts[0]
+            instance.last_name = name_parts[1] if len(name_parts) > 1 else ''
         
         # Update User fields
         for attr, value in validated_data.items():
@@ -129,6 +158,9 @@ class UserSerializer(serializers.ModelSerializer):
         else:
             profile = instance.profile
 
+        old_role_name = profile.role.name
+        old_team = profile.team
+
         if role_name:
             role, _ = Role.objects.get_or_create(name=role_name)
             profile.role = role
@@ -139,6 +171,21 @@ class UserSerializer(serializers.ModelSerializer):
             profile.team = profile_data['team']
             
         profile.save()
+
+        # Update Team.lead relation if role is TEAM_LEAD or changed
+        current_role = profile.role.name
+        current_team = profile.team
+
+        if current_role == 'TEAM_LEAD':
+            if old_team and old_team != current_team and old_team.lead == instance:
+                old_team.lead = None
+                old_team.save()
+            if current_team:
+                current_team.lead = instance
+                current_team.save()
+        else:
+            Team.objects.filter(lead=instance).update(lead=None)
+
         return instance
 
 class EmployeeProfileSerializer(serializers.ModelSerializer):
@@ -155,8 +202,8 @@ class UserSignupSerializer(serializers.ModelSerializer):
     region_id = serializers.PrimaryKeyRelatedField(queryset=Region.objects.all(), source='region', write_only=True, required=False, allow_null=True)
     team = serializers.PrimaryKeyRelatedField(queryset=Team.objects.all(), required=False, allow_null=True)
     team_id = serializers.PrimaryKeyRelatedField(queryset=Team.objects.all(), source='team', write_only=True, required=False, allow_null=True)
-    role = serializers.CharField(required=False, default='FIELD_AGENT')
-    role_name = serializers.CharField(source='role', write_only=True, required=False, default='FIELD_AGENT')
+    role = serializers.CharField(required=False)
+    role_name = serializers.CharField(source='role', write_only=True, required=False)
 
     class Meta:
         model = User
@@ -168,9 +215,10 @@ class UserSignupSerializer(serializers.ModelSerializer):
         if pwd != confirm_pwd:
             raise serializers.ValidationError({"password": "Passwords do not match."})
         
-        # Prevent self-registering as ADMIN
-        if data.get('role') == 'ADMIN':
-            data['role'] = 'FIELD_AGENT' # Force default if they try to be admin
+        # Handle role default and prevent self-registering as ADMIN
+        role = data.get('role')
+        if not role or role == 'ADMIN':
+            data['role'] = 'FIELD_AGENT'
             
         return data
 
@@ -209,4 +257,8 @@ class UserSignupSerializer(serializers.ModelSerializer):
             employee_id=emp_id
         )
         
+        if role_name == 'TEAM_LEAD' and team:
+            team.lead = user
+            team.save()
+            
         return user

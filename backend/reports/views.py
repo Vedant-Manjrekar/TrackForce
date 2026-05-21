@@ -4,7 +4,7 @@ from rest_framework import permissions as drf_permissions
 from tasks.models import Task
 from visits.models import Visit
 from users.models import Region, Team, User
-from django.db.models import Count, Avg, F
+from django.db.models import Count, Avg, F, Q
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 from datetime import timedelta
@@ -26,9 +26,14 @@ class ReportSummaryView(APIView):
             tasks_qs = tasks_qs.filter(region=user.profile.region)
             visits_qs = visits_qs.filter(task__region=user.profile.region)
         elif role == 'TEAM_LEAD':
-            from django.db.models import Q
-            tasks_qs = tasks_qs.filter(Q(team=user.profile.team) | Q(assigned_to__profile__role__name='FIELD_AGENT')).distinct()
-            visits_qs = visits_qs.filter(Q(task__team=user.profile.team) | Q(agent__profile__role__name='FIELD_AGENT')).distinct()
+            if user.profile.team:
+                tasks_q = Q(team=user.profile.team) | Q(assigned_to__profile__team=user.profile.team)
+                visits_q = Q(agent__profile__team=user.profile.team)
+                tasks_qs = tasks_qs.filter(tasks_q).distinct()
+                visits_qs = visits_qs.filter(visits_q).distinct()
+            else:
+                tasks_qs = tasks_qs.none()
+                visits_qs = visits_qs.none()
         # Auditor and Admin see all
 
         # 1. Pending tasks by region (Includes PENDING, ASSIGNED, IN_PROGRESS)
@@ -97,9 +102,14 @@ class DashboardSummaryView(APIView):
             tasks = tasks.filter(region=user.profile.region)
             visits = visits.filter(task__region=user.profile.region)
         elif role == 'TEAM_LEAD':
-            from django.db.models import Q
-            tasks = tasks.filter(Q(team=user.profile.team) | Q(assigned_to__profile__role__name='FIELD_AGENT')).distinct()
-            visits = visits.filter(Q(task__team=user.profile.team) | Q(agent__profile__role__name='FIELD_AGENT')).distinct()
+            if user.profile.team:
+                tasks_q = Q(team=user.profile.team) | Q(assigned_to__profile__team=user.profile.team)
+                visits_q = Q(agent__profile__team=user.profile.team)
+                tasks = tasks.filter(tasks_q).distinct()
+                visits = visits.filter(visits_q).distinct()
+            else:
+                tasks = tasks.none()
+                visits = visits.none()
         elif role == 'FIELD_AGENT':
             tasks = tasks.filter(assigned_to=user)
             visits = visits.filter(agent=user)
@@ -109,8 +119,10 @@ class DashboardSummaryView(APIView):
         if role == 'FIELD_AGENT':
             recent_logs = recent_logs.filter(actor=user)
         elif role == 'TEAM_LEAD':
-            from django.db.models import Q
-            recent_logs = recent_logs.filter(Q(actor__profile__team=user.profile.team) | Q(actor__profile__role__name='FIELD_AGENT')).distinct()
+            if user.profile.team:
+                recent_logs = recent_logs.filter(actor__profile__team=user.profile.team).distinct()
+            else:
+                recent_logs = recent_logs.none()
         elif role == 'REGIONAL_MANAGER':
             recent_logs = recent_logs.filter(actor__profile__region=user.profile.region)
 

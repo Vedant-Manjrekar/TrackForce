@@ -11,7 +11,7 @@ import { useCache } from '../components/CacheContext';
 import Loader from '../components/Loader';
 
 function Settings() {
-  const { getCachedData, fetchWithCache } = useCache();
+  const { getCachedData, setCachedData, fetchWithCache } = useCache();
   const cachedProfile = getCachedData('users_me') || null;
 
   const [activeTab, setActiveTab] = useState('Profile');
@@ -20,8 +20,7 @@ function Settings() {
   const [saving, setSaving] = useState(false);
   
   const [formData, setFormData] = useState({
-    first_name: cachedProfile?.first_name || '',
-    last_name: cachedProfile?.last_name || '',
+    full_name: cachedProfile?.full_name || '',
     email: cachedProfile?.email || '',
     new_password: '',
     confirm_password: ''
@@ -34,8 +33,7 @@ function Settings() {
         setUserProfile(data);
         setFormData(prev => ({
           ...prev,
-          first_name: data.first_name || '',
-          last_name: data.last_name || '',
+          full_name: data.full_name || '',
           email: data.email || ''
         }));
       } catch (err) {
@@ -52,8 +50,7 @@ function Settings() {
     setSaving(true);
     try {
       const response = await api.patch('/users/me/', {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
+        full_name: formData.full_name,
         email: formData.email
       });
       setUserProfile(response.data);
@@ -125,24 +122,32 @@ function Settings() {
 
           {activeTab === 'Profile' && (
             <form onSubmit={handleUpdateProfile} style={{ display: 'grid', gap: '20px', maxWidth: '500px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <div>
-                  <label>First Name</label>
-                  <input value={formData.first_name} onChange={e => setFormData({...formData, first_name: e.target.value})} style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
-                </div>
-                <div>
-                  <label>Last Name</label>
-                  <input value={formData.last_name} onChange={e => setFormData({...formData, last_name: e.target.value})} style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
-                </div>
+              <div>
+                <label>Full Name</label>
+                <input value={formData.full_name} onChange={e => setFormData({...formData, full_name: e.target.value})} style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
               </div>
               <div>
                 <label>Email Address</label>
                 <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{ width: '100%', padding: '12px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }} />
               </div>
-              <div style={{ background: 'var(--bg-color)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Role</div>
-                <div style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>{userProfile?.role}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <div style={{ background: 'var(--bg-color)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Role</div>
+                  <div style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>{userProfile?.role}</div>
+                </div>
+                {userProfile?.role === 'FIELD_AGENT' && (
+                  <div style={{ background: 'var(--bg-color)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Team Name</div>
+                    <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{userProfile?.team || 'No Team'}</div>
+                  </div>
+                )}
               </div>
+              {userProfile?.role === 'FIELD_AGENT' && (
+                <div style={{ background: 'var(--bg-color)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Team Lead's Name</div>
+                  <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{userProfile?.team_lead_name || 'No Team Lead'}</div>
+                </div>
+              )}
               <button type="submit" disabled={saving} style={{ width: 'fit-content', padding: '12px 30px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {saving ? <RefreshCw size={18} className="animate-spin" /> : <Save size={18} />}
                 Update Profile

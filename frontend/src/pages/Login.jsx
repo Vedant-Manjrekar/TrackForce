@@ -4,6 +4,7 @@ import api from '../services/api';
 import { jwtDecode } from 'jwt-decode';
 import { Sun, Moon, User as UserIcon, Lock, ArrowRight, ShieldCheck, AlertCircle, Key } from 'lucide-react';
 import { useTheme } from '../components/ThemeContext';
+import { useCache } from '../components/CacheContext';
 
 function Login({ setUser }) {
   const [username, setUsername] = useState('');
@@ -11,6 +12,7 @@ function Login({ setUser }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { isDarkMode, toggleTheme } = useTheme();
+  const { clearCache } = useCache();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,6 +23,7 @@ function Login({ setUser }) {
       localStorage.setItem('access_token', response.data.access);
       localStorage.setItem('refresh_token', response.data.refresh);
       const decoded = jwtDecode(response.data.access);
+      clearCache();
       setUser(decoded);
     } catch (err) {
       setError('Invalid username or password. Please verify your credentials.');
