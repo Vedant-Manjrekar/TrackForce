@@ -3,13 +3,28 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
 import { MessageSquare, Bot, AlertCircle, Calendar, User as UserIcon, MapPin, Flag, PlayCircle, CheckCircle2, Clock, ArrowLeft, ShieldAlert } from 'lucide-react';
 import Loader from '../components/Loader';
+import { jwtDecode } from 'jwt-decode';
 
-function TaskDetail() {
+function TaskDetail({ user }) {
   const { id } = useParams();
   const [task, setTask] = useState(null);
   const [visits, setVisits] = useState([]);
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [currentUser, setCurrentUser] = useState(user || null);
+
+  useEffect(() => {
+    if (!currentUser) {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        try {
+          setCurrentUser(jwtDecode(token));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  }, [user, currentUser]);
 
   const fetchTaskData = async () => {
     try {
@@ -86,7 +101,7 @@ function TaskDetail() {
           </h1>
         </div>
 
-        {task.status !== 'COMPLETED' && !activeVisit && (
+        {task.status !== 'COMPLETED' && !activeVisit && currentUser?.role !== 'TEAM_LEAD' && (
           <button onClick={handleStartVisit} style={{ padding: '12px 24px', fontSize: '14px' }}>
             <PlayCircle size={18} /> Start Visit
           </button>

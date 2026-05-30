@@ -9,7 +9,7 @@ function Landing() {
   return (
     <div className="landing-container">
       <nav className="landing-nav">
-        <div className="logo">FieldOps</div>
+        <div className="logo">TrackForce</div>
         <div className="nav-links" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <button 
             onClick={toggleTheme} 
@@ -170,10 +170,10 @@ function Landing() {
       <footer style={{ padding: '48px 0', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--text-secondary)', fontSize: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '700', color: 'var(--text-primary)' }}>
           <div style={{ width: '16px', height: '16px', background: 'var(--primary-gradient)', borderRadius: '4px' }}></div>
-          FieldOps Enterprise
+          TrackForce Enterprise
         </div>
         <div>
-          &copy; 2026 FieldOps Systems Inc. All rights reserved.
+          &copy; 2026 TrackForce Systems Inc. All rights reserved.
         </div>
       </footer>
     </div>

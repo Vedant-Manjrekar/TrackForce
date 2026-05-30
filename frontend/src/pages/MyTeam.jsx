@@ -12,7 +12,8 @@ function MyTeam() {
   
   const [agents, setAgents] = useState(initialAgents);
   const [loading, setLoading] = useState(initialAgents.length === 0);
-  const [selectedAgent, setSelectedAgent] = useState(null);
+  const [selectedAgentId, setSelectedAgentId] = useState(null);
+  const selectedAgent = agents.find(a => a.id === selectedAgentId) || null;
   const [agentTasks, setAgentTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(false);
 
@@ -32,7 +33,7 @@ function MyTeam() {
   }, [fetchWithCache]);
 
   const handleSelectAgent = async (agent) => {
-    setSelectedAgent(agent);
+    setSelectedAgentId(agent.id);
     setLoadingTasks(true);
     try {
       const response = await api.get(`/tasks/?assigned_to=${agent.id}`);
@@ -91,7 +92,10 @@ function MyTeam() {
 
               <div style={{ marginTop: '15px', display: 'flex', gap: '15px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  <MapPin size={14} style={{ color: 'var(--primary-color)' }} /> {agent.region || 'Unassigned'}
+                  <MapPin size={14} style={{ color: 'var(--primary-color)' }} /> {agent.region || 'Unassigned Region'}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                  <UsersIcon size={14} style={{ color: 'var(--primary-color)' }} /> {agent.team || 'Unassigned Team'}
                 </div>
               </div>
 
@@ -187,10 +191,11 @@ function MyTeam() {
                   <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px' }}>{selectedAgent.email}</div>
                   <div style={{ display: 'flex', gap: '16px', marginTop: '8px', fontSize: '13px', color: 'var(--text-tertiary)' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={14} style={{ color: 'var(--primary-color)' }} /> {selectedAgent.region || 'Unassigned Region'}</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><UsersIcon size={14} style={{ color: 'var(--primary-color)' }} /> {selectedAgent.team || 'Unassigned Team'}</span>
                   </div>
                 </div>
               </div>
-              <button onClick={() => setSelectedAgent(null)} className="btn-outline" style={{ padding: '8px', borderRadius: 'var(--radius-sm)' }}>
+              <button onClick={() => setSelectedAgentId(null)} className="btn-outline" style={{ padding: '8px', borderRadius: 'var(--radius-sm)' }}>
                 <X size={20} />
               </button>
             </div>
@@ -300,7 +305,7 @@ function MyTeam() {
 
             {/* Modal Footer */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '12px', borderTop: '1px solid var(--border-color)' }}>
-              <button onClick={() => setSelectedAgent(null)} style={{ padding: '10px 24px', fontSize: '14px' }}>
+              <button onClick={() => setSelectedAgentId(null)} style={{ padding: '10px 24px', fontSize: '14px' }}>
                 Close Report
               </button>
             </div>

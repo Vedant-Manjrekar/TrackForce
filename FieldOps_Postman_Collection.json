@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "field-ops-system-api",
-		"name": "Field Ops System API",
+		"_postman_id": "trackforce-system-api",
+		"name": "TrackForce System API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [

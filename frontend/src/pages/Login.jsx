@@ -77,10 +77,10 @@ function Login({ setUser }) {
       }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
           <div style={{ width: '32px', height: '32px', background: 'var(--primary-gradient)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '16px', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)' }}>
-            F
+            T
           </div>
           <span style={{ fontSize: '1.5rem', fontWeight: '800', fontFamily: 'var(--font-heading)', color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-            FieldOps
+            TrackForce
           </span>
         </Link>
         <button onClick={toggleTheme} className="btn-outline" style={{ padding: '10px', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -124,7 +124,7 @@ function Login({ setUser }) {
                 Welcome Back
               </h2>
               <p style={{ margin: 0, fontSize: '16px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-                Enter your credentials to access the FieldOps operating system.
+                Enter your credentials to access the TrackForce operating system.
               </p>
             </div>
 

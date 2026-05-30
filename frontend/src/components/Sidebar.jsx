@@ -95,10 +95,10 @@ function Sidebar({ onLogout, user }) {
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ width: '28px', height: '28px', background: 'var(--primary-gradient)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '14px', flexShrink: 0 }}>
-                  F
+                  T
                 </div>
                 <h2 style={{ margin: '0', fontSize: '20px', fontWeight: '700', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-                  FieldOps
+                  TrackForce
                 </h2>
               </div>
               <button 

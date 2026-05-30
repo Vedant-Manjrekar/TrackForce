@@ -81,11 +81,24 @@ function Teams() {
       }
 
       const updates = [];
+      const oldLeadId = currentTeam ? allUsers.find(u => u.team === currentTeam.name && u.role === 'TEAM_LEAD')?.id : null;
+
       if (formData.lead_id) {
         updates.push(api.patch(`/users/${formData.lead_id}/`, { team_id: teamId }));
+      } else if (oldLeadId) {
+        updates.push(api.patch(`/users/${oldLeadId}/`, { team_id: null }));
       }
+
+      const initialAgentIds = currentTeam ? allUsers.filter(u => u.team === currentTeam.name && u.role === 'FIELD_AGENT').map(u => u.id) : [];
+      
       formData.agent_ids.forEach(id => {
         updates.push(api.patch(`/users/${id}/`, { team_id: teamId }));
+      });
+      
+      initialAgentIds.forEach(id => {
+        if (!formData.agent_ids.includes(id)) {
+          updates.push(api.patch(`/users/${id}/`, { team_id: null }));
+        }
       });
 
       await Promise.all(updates);
