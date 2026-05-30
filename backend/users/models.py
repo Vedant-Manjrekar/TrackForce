@@ -29,7 +29,7 @@ class Region(models.Model):
         return self.name
 
 class User(AbstractUser):
-    # Custom fields for our Field Ops system
+    # Custom fields for our TrackForce system
     pass
 
 class EmployeeProfile(models.Model):

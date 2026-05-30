@@ -123,8 +123,9 @@ class TeamViewSet(viewsets.ModelViewSet):
             return Team.objects.filter(region=user.profile.region).order_by('-id')
             
         if role == 'TEAM_LEAD':
-            if user.profile.team:
-                return Team.objects.filter(id=user.profile.team.id).order_by('-id')
+            led_teams = Team.objects.filter(lead=user)
+            if led_teams.exists():
+                return Team.objects.filter(id__in=led_teams).order_by('-id')
             return Team.objects.none()
             
         if role == 'FIELD_AGENT':

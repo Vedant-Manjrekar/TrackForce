@@ -17,9 +17,9 @@ class ActivityLogViewSet(viewsets.ReadOnlyModelViewSet):
             from django.db.models import Q
             from users.models import Team
             led_teams = Team.objects.filter(lead=user)
-            q = Q(actor__profile__team__in=led_teams) | Q(actor=user)
-            if user.profile.team:
-                q = q | Q(actor__profile__team=user.profile.team)
+            q = Q(actor=user)
+            if led_teams.exists():
+                q = q | Q(actor__profile__team__in=led_teams)
             return ActivityLog.objects.filter(q).distinct().order_by('-timestamp')
             
         if role == 'REGIONAL_MANAGER':

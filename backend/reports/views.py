@@ -26,9 +26,10 @@ class ReportSummaryView(APIView):
             tasks_qs = tasks_qs.filter(region=user.profile.region)
             visits_qs = visits_qs.filter(task__region=user.profile.region)
         elif role == 'TEAM_LEAD':
-            if user.profile.team:
-                tasks_q = Q(team=user.profile.team) | Q(assigned_to__profile__team=user.profile.team)
-                visits_q = Q(agent__profile__team=user.profile.team)
+            led_teams = Team.objects.filter(lead=user)
+            if led_teams.exists():
+                tasks_q = Q(team__in=led_teams) | Q(assigned_to__profile__team__in=led_teams)
+                visits_q = Q(agent__profile__team__in=led_teams)
                 tasks_qs = tasks_qs.filter(tasks_q).distinct()
                 visits_qs = visits_qs.filter(visits_q).distinct()
             else:
@@ -102,9 +103,10 @@ class DashboardSummaryView(APIView):
             tasks = tasks.filter(region=user.profile.region)
             visits = visits.filter(task__region=user.profile.region)
         elif role == 'TEAM_LEAD':
-            if user.profile.team:
-                tasks_q = Q(team=user.profile.team) | Q(assigned_to__profile__team=user.profile.team)
-                visits_q = Q(agent__profile__team=user.profile.team)
+            led_teams = Team.objects.filter(lead=user)
+            if led_teams.exists():
+                tasks_q = Q(team__in=led_teams) | Q(assigned_to__profile__team__in=led_teams)
+                visits_q = Q(agent__profile__team__in=led_teams)
                 tasks = tasks.filter(tasks_q).distinct()
                 visits = visits.filter(visits_q).distinct()
             else:
@@ -119,8 +121,9 @@ class DashboardSummaryView(APIView):
         if role == 'FIELD_AGENT':
             recent_logs = recent_logs.filter(actor=user)
         elif role == 'TEAM_LEAD':
-            if user.profile.team:
-                recent_logs = recent_logs.filter(actor__profile__team=user.profile.team).distinct()
+            led_teams = Team.objects.filter(lead=user)
+            if led_teams.exists():
+                recent_logs = recent_logs.filter(actor__profile__team__in=led_teams).distinct()
             else:
                 recent_logs = recent_logs.none()
         elif role == 'REGIONAL_MANAGER':

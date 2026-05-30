@@ -43,10 +43,10 @@ class VisitViewSet(viewsets.ModelViewSet):
             from django.db.models import Q
             from users.models import Team
             led_teams = Team.objects.filter(lead=user)
-            q = Q(task__team__in=led_teams) | Q(agent__profile__team__in=led_teams)
-            if user.profile.team:
-                q = q | Q(task__team=user.profile.team) | Q(agent__profile__team=user.profile.team)
-            return Visit.objects.filter(q).distinct()
+            if led_teams.exists():
+                q = Q(task__team__in=led_teams) | Q(agent__profile__team__in=led_teams)
+                return Visit.objects.filter(q).distinct()
+            return Visit.objects.none()
             
         if role == 'FIELD_AGENT':
             return Visit.objects.filter(agent=user)

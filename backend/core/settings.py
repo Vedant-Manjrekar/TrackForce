@@ -199,7 +199,7 @@ CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='', cast=Csv())
 
 # Spectacular Configuration
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Field Ops API',
+    'TITLE': 'TrackForce API',
     'DESCRIPTION': 'API for Field Operations Task and Visit Management',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,

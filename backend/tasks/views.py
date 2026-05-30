@@ -39,10 +39,12 @@ class TaskViewSet(viewsets.ModelViewSet):
             return Task.objects.filter(region=user.profile.region)
             
         if role == 'TEAM_LEAD':
-            if user.profile.team:
+            from users.models import Team
+            led_teams = Team.objects.filter(lead=user)
+            if led_teams.exists():
                 return Task.objects.filter(
-                    Q(team=user.profile.team) |
-                    Q(assigned_to__profile__team=user.profile.team)
+                    Q(team__in=led_teams) |
+                    Q(assigned_to__profile__team__in=led_teams)
                 ).distinct()
             return Task.objects.none()
             
